@@ -18,23 +18,6 @@ UnitDisappearQueueLen:
 .byte 0
 DATA_END UnitDisappearQueueLen
 
-.data
-.global IsCharacterAvailable
-
-DATA_START IsCharacterAvailable
-IsCharacterAvailable:
-.byte 0
-.byte 1
-.byte 1
-.rept 12
-.byte 0
-.endr
-.byte 1
-.rept 19
-.byte 0
-.endr
-DATA_END IsCharacterAvailable
-
 .section .text
 .thumb
 

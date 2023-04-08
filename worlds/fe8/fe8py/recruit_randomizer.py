@@ -45,8 +45,8 @@ class CharacterPool:
             for (id, fill) in self.fills.items()
             if (id not in self.assigned_ids.values()) and fill_filter(fill)
         ]
-        # self.rng.shuffle(slot_ids)
-        # self.rng.shuffle(fill_ids)
+        self.rng.shuffle(slot_ids)
+        self.rng.shuffle(fill_ids)
         self.assigned_ids.update(zip(slot_ids, fill_ids))
 
     def assign(
@@ -105,25 +105,25 @@ def randomize_recruit_order(
 ) -> CharacterAssignments:
     pool = CharacterPool(rng, by_gender)
 
-    # pool.assign(
-    #     lambda char: char.requires_flying,
-    #     lambda char: char.flying,
-    # )
+    pool.assign(
+        lambda char: char.requires_flying,
+        lambda char: char.flying,
+    )
 
-    # pool.assign(
-    #     lambda char: char.requires_melee,
-    #     lambda char: char.melee_capable,
-    # )
+    pool.assign(
+        lambda char: char.requires_melee,
+        lambda char: char.melee_capable,
+    )
 
-    # pool.assign(
-    #     lambda char: char.requires_range,
-    #     lambda char: char.ranged_capable,
-    # )
+    pool.assign(
+        lambda char: char.requires_range,
+        lambda char: char.ranged_capable,
+    )
 
-    # pool.assign(
-    #     lambda char: char.requires_attack,
-    #     lambda char: char.attack_capable,
-    # )
+    pool.assign(
+        lambda char: char.requires_attack,
+        lambda char: char.attack_capable,
+    )
 
     pool.assign(
         lambda _: True,

@@ -8,21 +8,12 @@ import subprocess as sp
 from typing import Optional, Set
 
 import Utils
-from CommonClient import (
-    ClientCommandProcessor,
-    CommonContext,
-    get_base_parser,
-    gui_enabled,
-    logger,
-    server_loop,
-)
+from CommonClient import (ClientCommandProcessor, CommonContext,
+                          get_base_parser, gui_enabled, logger, server_loop)
 from Utils import async_start
 from worlds.fe8 import fe8py
-from worlds.fe8.fe8py.connector import (
-    CharacterRecruitEvent,
-    FE8Connection,
-    KeepaliveEvent,
-)
+from worlds.fe8.fe8py.connector import (CharacterRecruitEvent, FE8Connection,
+                                        KeepaliveEvent)
 from worlds.fe8.fe8py.constants.characters import CharacterSlot
 from worlds.fe8.fe8py.local_patcher import PatcherData, patch_rom
 from worlds.fe8.fe8py.rom import ROM
@@ -102,7 +93,7 @@ if __name__ == "__main__":
         with open(args.patch_data, "r", encoding="utf-8") as f:
             patch_data = PatcherData.from_dict(json.load(f))
 
-        with open(args.baserom, "rb") as f:
+        with open(args.base_rom, "rb") as f:
             base_rom = ROM.load(f.read(), True)
 
         connector_port = random.randint(9000, 50000)

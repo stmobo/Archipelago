@@ -27,7 +27,10 @@ def _is_randomizable_item(item: Union[ItemData, int]) -> bool:
         or (item_id in constants.items.STAT_BOOSTERS)
     )
 
-def apply_slot_substitution(slot: CharacterData, fill: CharacterData, rng: random.Random) -> CharacterData:
+
+def apply_slot_substitution(
+    slot: CharacterData, fill: CharacterData, rng: random.Random
+) -> CharacterData:
     should_promote = slot.default_class_id in constants.classes.PROMOTED_CLASSES
     is_promoted = fill.default_class_id in constants.classes.PROMOTED_CLASSES
     target_level = slot.base_level
@@ -411,7 +414,7 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
     new_rom.file.data[0x0AB8E8:0x0AB8EA] = b"\x00\x2d"
     new_rom.file.data[0x0AB8F8:0x0AB8FC] = b"\xe4\x46\xe4\x46"
 
-    integration_data_path = Path(__file__).parent.joinpath("integration")
+    integration_data_path = Path(__file__).parent.parent.joinpath("integration")
 
     linker = Linker(new_rom)
     linker.load_external_data(integration_data_path.joinpath("fe8-symbols.json"))
@@ -421,6 +424,47 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
     linker.duplicate_and_shim_thumb("SaveGame", "OnGameSave")
     linker.duplicate_and_shim_thumb("LoadGame", "OnGameLoad")
     linker.duplicate_and_shim_thumb("CopyGameSave", "DisableSaveCopying")
+
+    init_avail_state = bytearray(0x23)
+    for char_data in patch_data.characters:
+        if (
+            char_data.precollected
+            or char_data.send_item is None
+            or char_data.send_item.player_id == patch_data.player_id
+        ):
+            init_avail_state[char_data.slot.id] = 1
+
+    avail_state_section = linker.add_section(
+        "avail_state",
+        init_avail_state,
+        None,
+        section_type=SECTION_TYPE_ROM,
+    )
+    linker.add_symbol(
+        "IsCharacterAvailable", 0, avail_state_section, SYM_TYPE_DATA, size=0x23
+    )
+
+    # This data really ought to be part of the Lua connector proper, but for now let's just stash it in the ROM.
+    avail_data = b""
+    avail_offsets = {}
+    route_chapters = list(constants.characters.COMMON_CHAPTERS)
+    if patch_data.eirika_route:
+        route_chapters.extend(constants.characters.EIRIKA_CHAPTERS)
+    else:
+        route_chapters.extend(constants.characters.EPHRAIM_CHAPTERS)
+
+    for ch_id in route_chapters:
+        avail = constants.characters.AVAIL_MAP[ch_id]
+        avail_offsets[f"BaseAvailabilityCh{ch_id}"] = len(avail_data)
+        for char_id in range(0x23):
+            avail_data += b"1" if char_id in avail else b"0"
+
+    linker.add_section(
+        "avail_map",
+        bytearray(avail_data),
+        avail_offsets,
+        section_type=SECTION_TYPE_ROM,
+    )
 
     # Create texts for 'character received' and 'item sent' messages.
     char_recv_text_ids = [0] * 0x23

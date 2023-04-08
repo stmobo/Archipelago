@@ -225,14 +225,19 @@ local function handleClient(client)
         end
 
         if packetType == 1 then
+            local curChapter = readU8Symbol("gRAMChapterData", 0x0E)
+
             -- Sync unlocked characters
             local id = net.unpackBinaryString("4", payload)
             for i=1, 0x22 do
                 local prevAvailable = (readU8Symbol("IsCharacterAvailable", charId) ~= 0)
                 local nowAvailable = (string.byte(payload, 4 + i) == 0)
+                local prevRecruited = (
+                    readU8Symbol("BaseAvailabilityCh" .. tostring(curChapter), i) == 1
+                )
                 writeU8Symbol("IsCharacterAvailable", string.byte(payload, 4 + i), i)
 
-                if nowAvailable and not prevAvailable then
+                if prevRecruited and nowAvailable and not prevAvailable then
                     local evtAddr = setupAppearEvent(charId)
                     enqueuePlayerPhaseEvent(evtAddr, 3, true)
                 end
