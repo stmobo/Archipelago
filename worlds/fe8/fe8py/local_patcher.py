@@ -453,11 +453,12 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
     else:
         route_chapters.extend(constants.characters.EPHRAIM_CHAPTERS)
 
-    for ch_id in route_chapters:
-        avail = constants.characters.AVAIL_MAP[ch_id]
-        avail_offsets[f"BaseAvailabilityCh{ch_id}"] = len(avail_data)
-        for char_id in range(0x23):
-            avail_data += b"1" if char_id in avail else b"0"
+    for chs in (constants.characters.COMMON_CHAPTERS, constants.characters.EIRIKA_CHAPTERS, constants.characters.EPHRAIM_CHAPTERS):
+        for ch_id in chs:
+            avail = constants.characters.AVAIL_MAP[ch_id]
+            avail_offsets[f"BaseAvailabilityCh{ch_id}"] = len(avail_data)
+            for char_id in range(0x23):
+                avail_data += b"1" if char_id in avail else b"0"
 
     linker.add_section(
         "avail_map",

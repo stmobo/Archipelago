@@ -94,7 +94,7 @@ function resumeCoroutineAndCheck(co, ...)
     if status then
         return unpack(ret)
     else
-        console.writeline("coroutine returned error: " .. ret[1])
+        console.writeline("coroutine returned error: " .. tostring(ret[1]))
         return nil, ret[1]
     end
 end

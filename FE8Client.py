@@ -5,15 +5,25 @@ import json
 import os.path as osp
 import random
 import subprocess as sp
+from pathlib import Path
 from typing import Optional, Set
 
 import Utils
-from CommonClient import (ClientCommandProcessor, CommonContext,
-                          get_base_parser, gui_enabled, logger, server_loop)
+from CommonClient import (
+    ClientCommandProcessor,
+    CommonContext,
+    get_base_parser,
+    gui_enabled,
+    logger,
+    server_loop,
+)
 from Utils import async_start
 from worlds.fe8 import fe8py
-from worlds.fe8.fe8py.connector import (CharacterRecruitEvent, FE8Connection,
-                                        KeepaliveEvent)
+from worlds.fe8.fe8py.connector import (
+    CharacterRecruitEvent,
+    FE8Connection,
+    KeepaliveEvent,
+)
 from worlds.fe8.fe8py.constants.characters import CharacterSlot
 from worlds.fe8.fe8py.local_patcher import PatcherData, patch_rom
 from worlds.fe8.fe8py.rom import ROM
@@ -31,22 +41,39 @@ class FE8Context(CommonContext):
 
 
 async def run_game(romfile):
-    auto_start = Utils.get_options()["fe8_options"].get("rom_start", True)
-    if auto_start is True:
-        import webbrowser
+    sp.Popen(
+        [
+            Path.home().joinpath("Downloads", "BizHawk-2.8-win-x64", "EmuHawk.exe"),
+            "--lua="
+            + Path.cwd().joinpath("data", "lua", "FE8", "fe8_connector.lua").as_posix(),
+            romfile,
+        ],
+        stdin=sp.DEVNULL,
+        stdout=sp.DEVNULL,
+        stderr=sp.DEVNULL,
+    )
+    # auto_start = Utils.get_options()["fe8_options"].get("rom_start", True)
+    # if auto_start is True:
+    #     import webbrowser
 
-        webbrowser.open(romfile)
-    elif osp.isfile(auto_start):
-        sp.Popen(
-            [auto_start, romfile],
-            stdin=sp.DEVNULL,
-            stdout=sp.DEVNULL,
-            stderr=sp.DEVNULL,
-        )
+    #     webbrowser.open(romfile)
+    # elif osp.isfile(auto_start):
+    #     sp.Popen(
+    #         [auto_start, romfile],
+    #         stdin=sp.DEVNULL,
+    #         stdout=sp.DEVNULL,
+    #         stderr=sp.DEVNULL,
+    #     )
 
 
 async def sync_task(ctx: FE8Context, connector_port: int):
-    connection = await FE8Connection.connect("localhost", connector_port)
+    while True:
+        try:
+            connection = await FE8Connection.connect("localhost", connector_port)
+            break
+        except OSError:
+            pass
+
     while not ctx.exit_event.is_set():
         try:
             event = await asyncio.wait_for(connection.get_event(), 10)
@@ -107,14 +134,13 @@ if __name__ == "__main__":
 
         ctx = FE8Context(args.connect, args.password)
         ctx.server_task = asyncio.create_task(server_loop(ctx), name="ServerLoop")
-        if gui_enabled:
-            ctx.run_gui()
-        ctx.run_cli()
         ctx.sync_task = asyncio.create_task(
             sync_task(ctx, connector_port), name="GBA Sync"
         )
-
+        # if gui_enabled:
+        #     ctx.run_gui()
         async_start(run_game(out_path))
+        ctx.run_cli()
 
         await ctx.exit_event.wait()
         ctx.server_address = None

@@ -226,21 +226,26 @@ local function handleClient(client)
 
         if packetType == 1 then
             local curChapter = readU8Symbol("gRAMChapterData", 0x0E)
-
-            -- Sync unlocked characters
+            local availSymName = "BaseAvailabilityCh" .. tostring(curChapter)
             local id = net.unpackBinaryString("4", payload)
-            for i=1, 0x22 do
-                local prevAvailable = (readU8Symbol("IsCharacterAvailable", charId) ~= 0)
-                local nowAvailable = (string.byte(payload, 4 + i) == 0)
-                local prevRecruited = (
-                    readU8Symbol("BaseAvailabilityCh" .. tostring(curChapter), i) == 1
-                )
-                writeU8Symbol("IsCharacterAvailable", string.byte(payload, 4 + i), i)
 
-                if prevRecruited and nowAvailable and not prevAvailable then
-                    local evtAddr = setupAppearEvent(charId)
-                    enqueuePlayerPhaseEvent(evtAddr, 3, true)
+            if game_data.getSymbolAddress(availSymName) ~= nil then
+                -- Sync unlocked characters
+                for i=1, 0x22 do
+                    local prevAvailable = (readU8Symbol("IsCharacterAvailable", charId) ~= 0)
+                    local nowAvailable = (string.byte(payload, 4 + i) == 0)
+                    local prevRecruited = (
+                        readU8Symbol(availSymName, i) == 1
+                    )
+                    writeU8Symbol("IsCharacterAvailable", string.byte(payload, 4 + i), i)
+
+                    if prevRecruited and nowAvailable and not prevAvailable then
+                        local evtAddr = setupAppearEvent(charId)
+                        enqueuePlayerPhaseEvent(evtAddr, 3, true)
+                    end
                 end
+            else
+                console.write(string.format("could not find availability map for ch %02X\n", curChapter))
             end
             
             client:writePacket(1, net.packBinaryString("41", id, 1))
