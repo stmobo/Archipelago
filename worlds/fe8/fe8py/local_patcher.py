@@ -72,7 +72,7 @@ def apply_slot_substitution(
             new_data = new_data.apply_demotion(new_class, True)
             promo_text = "{} (demoted from {})".format(new_class.name, prev_class.name)
 
-    new_data = new_data.apply_autolevel_scaling(level_adjustment)
+    new_data = new_data.apply_autolevel_scaling(level_adjustment, rng)
     new_data = new_data.validate_stats()
 
     # new_data.base_ranks = [max(char_rank, class_rank) for (char_rank, class_rank) in zip(new_data.base_ranks, new_class.base_ranks)]
@@ -453,7 +453,11 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
     else:
         route_chapters.extend(constants.characters.EPHRAIM_CHAPTERS)
 
-    for chs in (constants.characters.COMMON_CHAPTERS, constants.characters.EIRIKA_CHAPTERS, constants.characters.EPHRAIM_CHAPTERS):
+    for chs in (
+        constants.characters.COMMON_CHAPTERS,
+        constants.characters.EIRIKA_CHAPTERS,
+        constants.characters.EPHRAIM_CHAPTERS,
+    ):
         for ch_id in chs:
             avail = constants.characters.AVAIL_MAP[ch_id]
             avail_offsets[f"BaseAvailabilityCh{ch_id}"] = len(avail_data)
@@ -477,12 +481,17 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
 
         msg_text = b"Received \x80\x21"
         msg_text += character.name.encode("utf-8")
+        if char_data.receive_item.player_id != patch_data.player_id:
+            msg_text += b"\x80\x21 from \x80\x21"
+            msg_text += char_data.receive_item.player_name.encode("utf-8")
         msg_text += b"\x80\x21.\x01\x03"
         new_rom.messages.append(Message(msg_text))
 
         if char_data.send_item is not None:
             char_send_text_ids[slot_id] = len(new_rom.messages)
-            msg_text = b"Sent \x80\x21"
+            msg_text = b"Sent out \x80\x21"
+            msg_text += char_data.send_item.player_name.encode("utf-8")
+            msg_text += b"\x80\x21's \x80\x21"
             msg_text += char_data.send_item.item_name.encode("utf-8")
             msg_text += b"\x80\x21.\x01\x03"
             new_rom.messages.append(Message(msg_text))

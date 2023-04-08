@@ -1,17 +1,12 @@
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Set, Tuple, Union
+from typing import (TYPE_CHECKING, Dict, Iterator, List, Optional, Set, Tuple,
+                    Union)
 
 from .. import constants
-from ..rom_struct import (
-    ArrayField,
-    Field,
-    RomStruct,
-    StructAddress,
-    StructID,
-    rom_struct,
-)
+from ..rom_struct import (ArrayField, Field, RomStruct, StructAddress,
+                          StructID, rom_struct)
 
 if TYPE_CHECKING:
     from ..rom import ROM
@@ -237,7 +232,7 @@ class CharacterData(RomStruct):
         )
 
     def apply_autolevel_scaling(
-        self, n_levels: int, use_class_growths: bool = False
+        self, n_levels: int, rng: random.Random, use_class_growths: bool = False
     ) -> CharacterData:
         if n_levels == 0:
             return self
@@ -256,7 +251,7 @@ class CharacterData(RomStruct):
 
         def random_point(grow_pct):
             nonlocal n_levels
-            if random.randint(0, 99) < grow_pct:
+            if rng.randint(0, 99) < grow_pct:
                 if n_levels > 0:
                     return 1
                 else:
