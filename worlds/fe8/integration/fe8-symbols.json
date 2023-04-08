@@ -1,0 +1,1484 @@
+{
+  "symbols": [
+    {
+      "name": "",
+      "offset": 0,
+      "size": null,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "",
+      "offset": 0,
+      "size": null,
+      "type": 2,
+      "space": "rom"
+    },
+    {
+      "name": "GetBattleUnitExpGain",
+      "offset": 181556,
+      "size": 130,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "BattleApplyItemExpGains",
+      "offset": 181688,
+      "size": 128,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "GetBattleUnitStaffExp",
+      "offset": 181816,
+      "size": 104,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "BattleApplyMiscActionExpGains",
+      "offset": 181920,
+      "size": 76,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gBattleActor",
+      "offset": 238828,
+      "size": 128,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "NewBMXFADE",
+      "offset": 122308,
+      "size": 44,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "StoreRNState",
+      "offset": 3148,
+      "size": 24,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gMsgHuffmanTable",
+      "offset": 1419052,
+      "size": 11612,
+      "type": 2,
+      "space": "rom"
+    },
+    {
+      "name": "LoadBWLEntries",
+      "offset": 672284,
+      "size": 44,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SaveNewGame",
+      "offset": 675440,
+      "size": 416,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gClassData",
+      "offset": 8417636,
+      "size": null,
+      "type": 1,
+      "space": "rom"
+    },
+    {
+      "name": "Proc_StartBlocking",
+      "offset": 11488,
+      "size": 46,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "LoadSavedUnit",
+      "offset": 677780,
+      "size": 588,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "Proc_Find",
+      "offset": 11932,
+      "size": 38,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gUnknown_08A3EE74",
+      "offset": 10743412,
+      "size": null,
+      "type": 2,
+      "space": "rom"
+    },
+    {
+      "name": "memcpy",
+      "offset": 859148,
+      "size": 94,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "sub_80B93E0",
+      "offset": 758752,
+      "size": 380,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "CanBattleUnitGainLevels",
+      "offset": 178676,
+      "size": 50,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "CallEvent",
+      "offset": 53372,
+      "size": 50,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "RefreshUnitSprites",
+      "offset": 160160,
+      "size": 460,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "UpdateLastUsedGameSaveSlot",
+      "offset": 675200,
+      "size": 32,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SaveChapterWinData",
+      "offset": 672392,
+      "size": 20,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "LoadGeneralGameMetadata",
+      "offset": 666920,
+      "size": 126,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "sub_80BF294",
+      "offset": 782996,
+      "size": 24,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gMsgStringTable",
+      "offset": 1430668,
+      "size": 13616,
+      "type": 2,
+      "space": "rom"
+    },
+    {
+      "name": "InitTargets",
+      "offset": 325796,
+      "size": 24,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "UnitKill",
+      "offset": 99324,
+      "size": 52,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "LoadGame",
+      "offset": 676136,
+      "size": 240,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gKeyStatusPtr",
+      "offset": 5798172,
+      "size": 4,
+      "type": 2,
+      "space": "rom"
+    },
+    {
+      "name": "SaveGeneralGameMetadata",
+      "offset": 667048,
+      "size": 40,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "PlayerPhase_MainIdle",
+      "offset": 117056,
+      "size": 560,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "EventEngine_Create",
+      "offset": 53424,
+      "size": 144,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "Proc_Goto",
+      "offset": 12068,
+      "size": 56,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "InitRN",
+      "offset": 3016,
+      "size": 108,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gBmMapTerrain",
+      "offset": 189660,
+      "size": 4,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "sub_8037E64",
+      "offset": 228964,
+      "size": 24,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "RenderBmMap",
+      "offset": 105532,
+      "size": 128,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "sub_80BF210",
+      "offset": 782864,
+      "size": 130,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SaveGame",
+      "offset": 675856,
+      "size": 280,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gUnitLookup",
+      "offset": 5875152,
+      "size": 1024,
+      "type": 1,
+      "space": "rom"
+    },
+    {
+      "name": "SaveGMMonsterRnState",
+      "offset": 678368,
+      "size": 30,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "RenderBmMapOnBg2",
+      "offset": 105660,
+      "size": 108,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SaveUnit",
+      "offset": 676668,
+      "size": 1112,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gBmMapHidden",
+      "offset": 189676,
+      "size": 4,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "__modsi3",
+      "offset": 858516,
+      "size": 206,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SaveWMStuff",
+      "offset": 684208,
+      "size": 136,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gBmMapMovement",
+      "offset": 189664,
+      "size": 4,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "LoadGMMonsterRnState",
+      "offset": 678400,
+      "size": 32,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "sub_8037E4C",
+      "offset": 228940,
+      "size": 24,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "EndPlayerPhaseSideWindows",
+      "offset": 577872,
+      "size": 64,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "TickActiveFactionTurn",
+      "offset": 100440,
+      "size": 260,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SaveConvoyItems",
+      "offset": 668132,
+      "size": 136,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "EventEngineExists",
+      "offset": 53656,
+      "size": 24,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "RunWaitEvents",
+      "offset": 541632,
+      "size": 156,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "GetUnitFromCharId",
+      "offset": 98972,
+      "size": 58,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "StartPlayerPhaseSideWindows",
+      "offset": 577852,
+      "size": 20,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "RunPotentialWaitEvents",
+      "offset": 119552,
+      "size": 26,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gBmMapSize",
+      "offset": 189652,
+      "size": 4,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "CheckBattleUnitLevelUp",
+      "offset": 178728,
+      "size": 470,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "AddTarget",
+      "offset": 325820,
+      "size": 84,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "ResetUnitSpriteHover",
+      "offset": 162368,
+      "size": 12,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "BattleApplyExpGains",
+      "offset": 178476,
+      "size": 116,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SaveBWLEntries",
+      "offset": 672356,
+      "size": 36,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SetGameClock",
+      "offset": 3380,
+      "size": 12,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SGM_SetCharacterKnown",
+      "offset": 669608,
+      "size": 72,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "GetUnitMovementCost",
+      "offset": 101708,
+      "size": 66,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gUnknown_089ECD4C",
+      "offset": 10407244,
+      "size": null,
+      "type": 2,
+      "space": "rom"
+    },
+    {
+      "name": "LoadRNState",
+      "offset": 3124,
+      "size": 24,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "sub_80A9250",
+      "offset": 692816,
+      "size": 62,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "CheckForWaitEvents",
+      "offset": 541488,
+      "size": 142,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "LoadBonusContentClaimFlags",
+      "offset": 675164,
+      "size": 36,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "RefreshEntityBmMaps",
+      "offset": 106996,
+      "size": 76,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gBmMapUnit",
+      "offset": 189656,
+      "size": 4,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "LoadChapterDataWinArray",
+      "offset": 672328,
+      "size": 28,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "ClearUnitSupports",
+      "offset": 164832,
+      "size": 82,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gRAMChapterData",
+      "offset": 179440,
+      "size": null,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "GetSaveTargetAddress",
+      "offset": 667748,
+      "size": 174,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "WriteAndVerifySramFast",
+      "offset": 858188,
+      "size": 64,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gItemData",
+      "offset": 8428304,
+      "size": 7416,
+      "type": 1,
+      "space": "rom"
+    },
+    {
+      "name": "SaveBonusContentClaimFlags",
+      "offset": 675136,
+      "size": 28,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "ClearSaveBlock",
+      "offset": 678432,
+      "size": 40,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "CopyGameSave",
+      "offset": 675336,
+      "size": 104,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gGameState",
+      "offset": 179376,
+      "size": null,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "ClearUnits",
+      "offset": 96196,
+      "size": 48,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "MenuAlwaysNotShown",
+      "offset": 324688,
+      "size": 4,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "GetSaveSourceAddress",
+      "offset": 667924,
+      "size": 26,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SaveGlobalEventIndexes",
+      "offset": 667984,
+      "size": 30,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "SaveMetadata_Save",
+      "offset": 667540,
+      "size": 144,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "NextRN",
+      "offset": 2952,
+      "size": 64,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gCharacterData",
+      "offset": 8404324,
+      "size": null,
+      "type": 1,
+      "space": "rom"
+    },
+    {
+      "name": "gGenericBuffer",
+      "offset": 131464,
+      "size": null,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "LoadWMStuff",
+      "offset": 684344,
+      "size": 170,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "LoadGlobalEventIds",
+      "offset": 668056,
+      "size": 40,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "GetGameClock",
+      "offset": 3368,
+      "size": 12,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "LoadConvoyItems",
+      "offset": 668268,
+      "size": 128,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "_call_via_r3",
+      "offset": 858316,
+      "size": 4,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "StartMapSongBgm",
+      "offset": 90320,
+      "size": 16,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gBattleTarget",
+      "offset": 238956,
+      "size": 128,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "m4aSongNumStart",
+      "offset": 852476,
+      "size": 44,
+      "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gUnitArrayBlue",
+      "offset": 179788,
+      "size": 4464,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "ReadSramFast",
+      "offset": 16803744,
+      "size": 4,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "gEventCallQueue",
+      "offset": 16778296,
+      "size": 64,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "gEventSlots",
+      "offset": 16778424,
+      "size": 56,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "gActiveUnit",
+      "offset": 16797264,
+      "size": 4,
+      "type": 1,
+      "space": "wram"
+    }
+  ],
+  "relocations": [
+    {
+      "offset": 1760,
+      "symbol_name": "gMsgHuffmanTable",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 3028,
+      "symbol_name": "memcpy",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 3038,
+      "symbol_name": "__modsi3",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 3086,
+      "symbol_name": "__modsi3",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 3096,
+      "symbol_name": "NextRN",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 3116,
+      "symbol_name": "",
+      "type": 2,
+      "addend": 0,
+      "original_field": 881908,
+      "space": "rom"
+    },
+    {
+      "offset": 41580,
+      "symbol_name": "gMsgStringTable",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 41632,
+      "symbol_name": "gMsgStringTable",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 99362,
+      "symbol_name": "ClearUnitSupports",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 100454,
+      "symbol_name": "InitTargets",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 100468,
+      "symbol_name": "gRAMChapterData",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 100632,
+      "symbol_name": "AddTarget",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 100654,
+      "symbol_name": "RenderBmMapOnBg2",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 100658,
+      "symbol_name": "RefreshEntityBmMaps",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 100662,
+      "symbol_name": "RenderBmMap",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 100668,
+      "symbol_name": "NewBMXFADE",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 100672,
+      "symbol_name": "RefreshUnitSprites",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 100688,
+      "symbol_name": "gUnitLookup",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 100696,
+      "symbol_name": "gRAMChapterData",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 119554,
+      "symbol_name": "CheckForWaitEvents",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 119568,
+      "symbol_name": "RunWaitEvents",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 178564,
+      "symbol_name": "CheckBattleUnitLevelUp",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 178570,
+      "symbol_name": "CheckBattleUnitLevelUp",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 178580,
+      "symbol_name": "gBattleActor",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 178584,
+      "symbol_name": "gBattleTarget",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 178588,
+      "symbol_name": "gRAMChapterData",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 181756,
+      "symbol_name": "CheckBattleUnitLevelUp",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 181764,
+      "symbol_name": "gRAMChapterData",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 181768,
+      "symbol_name": "gBattleActor",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 181806,
+      "symbol_name": "CheckBattleUnitLevelUp",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 181938,
+      "symbol_name": "CanBattleUnitGainLevels",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 181976,
+      "symbol_name": "CheckBattleUnitLevelUp",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 181988,
+      "symbol_name": "gBattleActor",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 181992,
+      "symbol_name": "gRAMChapterData",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 542508,
+      "symbol_name": "gUnknown_089ECD4C",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 675348,
+      "symbol_name": "GetSaveSourceAddress",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675356,
+      "symbol_name": "GetSaveTargetAddress",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675376,
+      "symbol_name": "_call_via_r3",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675386,
+      "symbol_name": "WriteAndVerifySramFast",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675404,
+      "symbol_name": "SaveMetadata_Save",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675428,
+      "symbol_name": "gGenericBuffer",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 675870,
+      "symbol_name": "GetSaveTargetAddress",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675878,
+      "symbol_name": "ClearSaveBlock",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675888,
+      "symbol_name": "GetGameClock",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675900,
+      "symbol_name": "WriteAndVerifySramFast",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675932,
+      "symbol_name": "SaveUnit",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675948,
+      "symbol_name": "LoadGeneralGameMetadata",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675966,
+      "symbol_name": "SGM_SetCharacterKnown",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675982,
+      "symbol_name": "SaveGeneralGameMetadata",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 675992,
+      "symbol_name": "SaveGMMonsterRnState",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676000,
+      "symbol_name": "SaveConvoyItems",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676008,
+      "symbol_name": "SaveBWLEntries",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676016,
+      "symbol_name": "SaveChapterWinData",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676022,
+      "symbol_name": "SaveBonusContentClaimFlags",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676030,
+      "symbol_name": "SaveGlobalEventIndexes",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676040,
+      "symbol_name": "SaveWMStuff",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676046,
+      "symbol_name": "sub_8037E4C",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676060,
+      "symbol_name": "WriteAndVerifySramFast",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676074,
+      "symbol_name": "SaveMetadata_Save",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676080,
+      "symbol_name": "UpdateLastUsedGameSaveSlot",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676100,
+      "symbol_name": "gRAMChapterData",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 676104,
+      "symbol_name": "gUnitArrayBlue",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 676148,
+      "symbol_name": "GetSaveSourceAddress",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676168,
+      "symbol_name": "ClearSaveBlock",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676184,
+      "symbol_name": "_call_via_r3",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676190,
+      "symbol_name": "SetGameClock",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676198,
+      "symbol_name": "ClearUnits",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676220,
+      "symbol_name": "LoadSavedUnit",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676240,
+      "symbol_name": "LoadGMMonsterRnState",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676248,
+      "symbol_name": "LoadConvoyItems",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676256,
+      "symbol_name": "LoadGlobalEventIds",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676264,
+      "symbol_name": "LoadBWLEntries",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676272,
+      "symbol_name": "LoadChapterDataWinArray",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676278,
+      "symbol_name": "LoadBonusContentClaimFlags",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676288,
+      "symbol_name": "LoadWMStuff",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676306,
+      "symbol_name": "_call_via_r3",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676312,
+      "symbol_name": "sub_8037E64",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676318,
+      "symbol_name": "UpdateLastUsedGameSaveSlot",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676336,
+      "symbol_name": "gGameState",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 676344,
+      "symbol_name": "gRAMChapterData",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 676348,
+      "symbol_name": "gUnitArrayBlue",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 692870,
+      "symbol_name": "SaveNewGame",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 758792,
+      "symbol_name": "gKeyStatusPtr",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 758822,
+      "symbol_name": "sub_80BF294",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 758860,
+      "symbol_name": "gKeyStatusPtr",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 759078,
+      "symbol_name": "m4aSongNumStart",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 759110,
+      "symbol_name": "sub_80BF210",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 759128,
+      "symbol_name": "gRAMChapterData",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 1430664,
+      "symbol_name": "gMsgHuffmanTable",
+      "type": 2,
+      "addend": 0,
+      "original_field": 11608,
+      "space": "rom"
+    },
+    {
+      "offset": 181738,
+      "symbol_name": "GetBattleUnitStaffExp",
+      "type": 10,
+      "addend": 0,
+      "original_field": -2,
+      "space": "rom"
+    },
+    {
+      "offset": 676340,
+      "symbol_name": "ReadSramFast",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    },
+    {
+      "offset": 679260,
+      "symbol_name": "ReadSramFast",
+      "type": 2,
+      "addend": 0,
+      "original_field": 0,
+      "space": "rom"
+    }
+  ]
+}
