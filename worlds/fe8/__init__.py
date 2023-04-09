@@ -4,17 +4,18 @@ import json
 import os.path as osp
 from typing import Dict
 
-from BaseClasses import (Entrance, Item, ItemClassification, Location,
-                         MultiWorld, Region)
+from BaseClasses import Entrance, Item, ItemClassification, Location, MultiWorld, Region
 
 from ..AutoWorld import WebWorld, World
-from .fe8py.constants.characters import (AP_ITEM_NAMES_TO_IDS,
-                                         AP_LOCATION_NAMES_TO_IDS, EIRIKA,
-                                         EPHRAIM, SETH)
-from .fe8py.local_patcher import (PatcherCharacterData, PatcherData,
-                                  PatcherItemData)
-from .fe8py.recruit_randomizer import (CharacterAssignments,
-                                       randomize_recruit_order)
+from .fe8py.constants.characters import (
+    AP_ITEM_NAMES_TO_IDS,
+    AP_LOCATION_NAMES_TO_IDS,
+    EIRIKA,
+    EPHRAIM,
+    SETH,
+)
+from .fe8py.local_patcher import PatcherCharacterData, PatcherData, PatcherItemData
+from .fe8py.recruit_randomizer import CharacterAssignments, randomize_recruit_order
 from .Items import FE8Item
 from .Locations import FE8Location, create_chapter_regions
 from .Options import fe8_options
@@ -191,12 +192,14 @@ class FE8World(World):
                 )
             )
 
+        death_link = get_options(self.multiworld, "death_link", self.player)
         patcher_data = PatcherData(
             self.multiworld.seed_name,
             self.multiworld.seed,
             self.player,
             self.multiworld.player_name[self.player],
             self.eirika_route,
+            death_link,
             character_data,
         )
 

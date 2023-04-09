@@ -9,14 +9,24 @@ from pathlib import Path
 from typing import Dict, Optional, Set
 
 import Utils
-from CommonClient import (ClientCommandProcessor, CommonContext,
-                          get_base_parser, gui_enabled, logger, server_loop)
+from CommonClient import (
+    ClientStatus,
+    CommonContext,
+    get_base_parser,
+    gui_enabled,
+    logger,
+    server_loop,
+)
 from Utils import async_start
-from worlds.fe8 import fe8py
-from worlds.fe8.fe8py.connector import (CharacterRecruitEvent,
-                                        ConnectionClosedError,
-                                        ConnectionTimeoutError, FE8Connection,
-                                        KeepaliveEvent)
+from worlds.fe8.fe8py.connector import (
+    CharacterRecruitEvent,
+    ConnectionClosedError,
+    ConnectionTimeoutError,
+    FE8Connection,
+    GameOverEvent,
+    KeepaliveEvent,
+    VictoryEvent,
+)
 from worlds.fe8.fe8py.constants.characters import CharacterFill, CharacterSlot
 from worlds.fe8.fe8py.local_patcher import PatcherData, patch_rom
 from worlds.fe8.fe8py.rom import ROM
@@ -26,6 +36,7 @@ class FE8Context(CommonContext):
     game = "Fire Emblem The Sacred Stones"
     seen_locations: Set[int]
     patch_data: PatcherData
+    awaiting_deathlink: asyncio.Event
 
     def __init__(self, patch_data: PatcherData, server_address, password):
         super().__init__(server_address, password)
@@ -33,11 +44,17 @@ class FE8Context(CommonContext):
         self.auth = patch_data.player_name
         self.items_handling = 0b111
         self.seen_locations = set()
+        self.awaiting_deathlink = asyncio.Event()
 
     async def server_auth(self, password_requested: bool = False):
         if password_requested and not self.password:
             await super(FE8Context, self).server_auth(password_requested)
         await self.send_connect()
+
+    def on_deathlink(self, data: dict):
+        if self.patch_data.death_link:
+            self.awaiting_deathlink.set()
+        super().on_deathlink(data)
 
 
 async def run_game(romfile):
@@ -67,15 +84,24 @@ async def run_game(romfile):
     #     )
 
 
+async def deathlink_handler(ctx: FE8Context, connection: FE8Connection):
+    while True:
+        await ctx.awaiting_deathlink.wait()
+        await connection.trigger_game_over()
+        ctx.awaiting_deathlink.clear()
+
+
 async def handle_connector_events(
     ctx: FE8Context, patch_data: PatcherData, connection: FE8Connection
 ):
     item_id_to_slot: Dict[int, CharacterSlot] = {}
     slot_id_to_location_id: Dict[int, Optional[int]] = {}
+    slot_id_to_fill: Dict[int, CharacterFill] = {}
 
     for character in patch_data.characters:
         item_id_to_slot[character.receive_item.item_id] = character.slot
         slot_id_to_location_id[character.slot.id] = character.location_id
+        slot_id_to_fill[character.slot.id] = character.fill
 
     while True:
         event = await connection.get_event()
@@ -103,6 +129,22 @@ async def handle_connector_events(
                 connection.enqueue_active_event_response(*new_chars),
             )
             ctx.seen_locations.update(event.characters)
+        elif isinstance(event, VictoryEvent):
+            ctx.finished_game = True
+            ctx.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
+        elif isinstance(event, GameOverEvent) and "DeathLink" in ctx.tags:
+            dead_chars = [slot_id_to_fill[char_id] for char_id in event.characters]
+            # We should only ever get one dead character at a time, but handling multiple simultaneous deaths isn't that hard.
+            if len(dead_chars) == 0:
+                msg = ""
+            elif len(dead_chars) == 1:
+                msg = f"{dead_chars[0].name} has been defeated in {ctx.auth}'s world!"
+            elif len(dead_chars) == 2:
+                msg = f"{dead_chars[0].name} and {dead_chars[1].name} have been defeated in {ctx.auth}'s world!"
+            elif len(dead_chars) > 2:
+                names_first = ", ".join(c.name for c in dead_chars[:-1])
+                msg = f"{names_first}, and {dead_chars[-1].name} have been defeated in {ctx.auth}'s world!"
+            await ctx.send_death(msg)
 
 
 async def connect_to_fe8(ctx: FE8Context, patch_data: PatcherData, connector_port: int):
@@ -119,8 +161,15 @@ async def connect_to_fe8(ctx: FE8Context, patch_data: PatcherData, connector_por
             continue
 
         logger.info("Connected to FE8.")
+        await ctx.update_death_link(patch_data.death_link)
+        if patch_data.death_link:
+            logger.info("DeathLink enabled.")
+
         exit_task = asyncio.create_task(ctx.exit_event.wait(), name="Exit Event Task")
         packet_task = asyncio.create_task(connection.run(), name="Connector Read Task")
+        deathlink_task = asyncio.create_task(
+            deathlink_handler(ctx, connection), name="DeathLink Handler Task"
+        )
         event_task = asyncio.create_task(
             handle_connector_events(ctx, patch_data, connection),
             name="Sync Event Handler",
@@ -130,7 +179,7 @@ async def connect_to_fe8(ctx: FE8Context, patch_data: PatcherData, connector_por
             # Wait for either the packet reader or event handler tasks to raise an exception,
             # or for the exit event to be set.
             done, pending = await asyncio.wait(
-                (packet_task, event_task, exit_task),
+                (packet_task, event_task, exit_task, deathlink_task),
                 return_when=asyncio.FIRST_COMPLETED,
             )
 

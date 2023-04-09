@@ -31,6 +31,17 @@ class KeepaliveEvent:
     pass
 
 
+class VictoryEvent:
+    pass
+
+
+class GameOverEvent:
+    characters: Tuple[int, ...]  # list of characters that are dead
+
+    def __init__(self, characters: Tuple[int, ...]) -> None:
+        self.characters = characters
+
+
 class CharacterRecruitEvent:
     characters: Tuple[int, ...]
 
@@ -110,6 +121,12 @@ class FE8Connection:
 
                 unlocked = tuple(char_id for char_id in unlocked if char_id != 0)
                 self.events.put_nowait(CharacterRecruitEvent(unlocked))
+            elif packet_type == 3:  # Victory event
+                self.events.put_nowait(VictoryEvent())
+            elif packet_type == 4:  # Game over event
+                _, n_dead = struct.unpack(">IH", payload[:6])
+                characters = tuple(payload[6 : 6 + n_dead])
+                self.events.put_nowait(GameOverEvent(characters))
 
     async def sync_unlocked_units(self, unlocked_chars: List[int]):
         statuses = [0] * 0x22
@@ -138,7 +155,19 @@ class FE8Connection:
         else:
             raise CommandError(payload[1:].decode("utf-8"))
 
-    async def get_event(self) -> Union[KeepaliveEvent, CharacterRecruitEvent]:
+    async def trigger_game_over(self):
+        req_id, fut = self._init_request()
+        await self._write_packet(3, struct.pack(">I", req_id))
+
+        payload: bytes = await fut
+        if payload[0] == 1:
+            return payload[1:]
+        else:
+            raise CommandError(payload[1:].decode("utf-8"))
+
+    async def get_event(
+        self,
+    ) -> Union[KeepaliveEvent, CharacterRecruitEvent, GameOverEvent, VictoryEvent]:
         if self.writer.is_closing():
             raise ConnectionClosedError()
         return await self.events.get()

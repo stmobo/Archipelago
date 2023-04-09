@@ -18,8 +18,8 @@ INCLUDES := $(wildcard $(INCLUDE_DIR)/*.h)
 C_OBJS := $(addprefix $(BIN_DIR)/, $(C_OBJS))
 ASM_OBJS := $(addprefix $(BIN_DIR)/, $(ASM_OBJS))
 
-base-symbols.json: extract_elf_data.py fireemblem8-relocs.elf
-	python3.9 extract_elf_data.py fireemblem8-relocs.elf | jq > base-symbols.json
+fe8-symbols.json: extract_elf_data.py fireemblem8-relocs.elf
+	python3.9 extract_elf_data.py fireemblem8-relocs.elf | jq > fe8-symbols.json
 
 bin/archipelago.o: $(C_OBJS) $(ASM_OBJS) $(INCLUDES)
 	$(LD) -r -o bin/archipelago.o $(C_OBJS) $(ASM_OBJS)

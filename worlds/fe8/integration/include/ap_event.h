@@ -25,7 +25,7 @@ void EnqueueWaitingAPEvents();
 void PlayerPhase_MainIdleShim(ProcPtr);
 u8 PPEventsRunning(ProcPtr proc);
 u8 RunActiveEventRequest(ProcPtr proc);
-ProcPtr RequestActiveEvent(ProcPtr parent, u32 request);
+ProcPtr RequestActiveEvent(ProcPtr parent, u32 type, u32 request);
 void FinishActiveEvent(ProcPtr parent);
 
 

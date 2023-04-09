@@ -14,6 +14,7 @@ struct EnqueuedEventCall {
 /* Used for events that integration code specifically requests from the connector
  * (for example, location check events)
  */
+volatile u32 ActiveEventType = 0;
 volatile u32 ActiveEventRequest = 0;
 volatile struct APQueuedEvent *ActiveEventResponse = NULL;
 
@@ -23,6 +24,7 @@ volatile struct APQueuedEvent *ActiveEventResponse = NULL;
 volatile struct APQueuedEvent *PPEventQueue = NULL;
 volatile u8 PPEventActiveFlag = 0; // used by connector to identify when memory can be freed
 
+u8 triggeredGameOver = 0;
 
 /* Extern items only used by this code */
 extern struct EnqueuedEventCall gEventCallQueue[];
@@ -44,6 +46,7 @@ extern void EndPlayerPhaseSideWindows();
 extern void RefreshEntityBmMaps();
 extern void RenderBmMap();
 extern void RefreshUnitSprites();
+extern void sub_8085374(ProcPtr proc);
 
 struct ProcCmd ActiveEventProc[] CONST_DATA = {
     PROC_NAME("ActiveEventProc"),
@@ -185,10 +188,12 @@ u8 RunActiveEventRequest(ProcPtr proc) {
 
 void FinishActiveEvent(ProcPtr parent) {
     ActiveEventRequest = 0;
+    ActiveEventType = 0;
     ActiveEventResponse = NULL;
 }
 
-ProcPtr RequestActiveEvent(ProcPtr parent, u32 request) {
+ProcPtr RequestActiveEvent(ProcPtr parent, u32 type, u32 request) {
+    ActiveEventType = type;
     ActiveEventRequest = request;
     return Proc_StartBlocking(ActiveEventProc, parent);
 }
@@ -205,7 +210,7 @@ void ASMCOnUnitRecruited(ProcPtr parent) {
         reqId = (reqId << 8) | charId;
     }
 
-    RequestActiveEvent(parent, reqId);
+    RequestActiveEvent(parent, 1, reqId);
 }
 
 void ASMCPrepareUnitDisappearEffect(ProcPtr parent) {
@@ -322,4 +327,21 @@ void ASMCPrepareUnitAppearEffect(ProcPtr parent) {
         RenderBmMap();
         RefreshUnitSprites();
     }
+}
+
+void ASMCSendVictoryEvent(ProcPtr parent) {
+    RequestActiveEvent(parent, 2, 1);
+}
+
+u8 OnGameOver(ShimRegisters *regs) {
+    if (!triggeredGameOver) {
+        RequestActiveEvent((ProcPtr)regs->r0, 3, 1);
+    }
+    return 0;
+}
+
+void ASMCTriggerGameOver(ProcPtr parent) {
+    triggeredGameOver = 1;
+    sub_8085374(parent);
+    triggeredGameOver = 0;
 }

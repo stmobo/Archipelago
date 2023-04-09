@@ -786,6 +786,15 @@ AVAIL_MAP = {
     0x3E: {EIRIKA, SETH, GILLIAM, FRANZ, MOULDER, VANESSA, ROSS, NEIMI, COLM, GARCIA, LUTE, NATASHA, CORMAG, EPHRAIM, FORDE, KYLE, AMELIA, ARTUR, DUESSEL, JOSHUA, TANA},
 }
 
+# Events that play when Fomortiis dies.
+FINAL_BOSS_DEFEAT_EVENTS = [
+    0x089F9F10, # C21x (Eirika)
+    0x089FDB58, # C21x (Ephraim)
+]
+
+# Event that plays on game over.
+GAME_OVER_EVENT = 0x08592104
+
 # fmt: on
 
 

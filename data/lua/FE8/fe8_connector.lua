@@ -65,7 +65,7 @@ local function cleanupEventAllocs()
         queuedAppearEvents = {}
     end
 
-    if (readU32Symbol("ActiveEventRequest") == 0) and (readU32Symbol("ActiveEventResponse") == 0) and (#activeEventAllocs > 0) then
+    if (readU32Symbol("ActiveEventRequest") == 0) and (readU32Symbol("ActiveEventType") == 0) and (readU32Symbol("ActiveEventResponse") == 0) and (#activeEventAllocs > 0) then
         for i=1, #activeEventAllocs do
             rm.free(activeEventAllocs[i])
         end
@@ -218,6 +218,29 @@ local function setupAppearEvent(charId)
     return eventAddr
 end
 
+local function setupGameOverEvent()
+    local asmcAddr = game_data.getSymbolAddress("ASMCTriggerGameOver")
+    local builder = game_data.EventBuilder:new()
+
+    -- ASMC ...
+    builder:push_u16(0x0D40, 0)
+    builder:push_u32(bit.bor(asmcAddr, 1))
+    -- EVBIT_T 7
+    builder:push_u16(0x0228, 7)
+    -- ENDA
+    builder:push_u16(0x0120, 0)
+
+    local eventAddr = rm.romalloc(builder:size())
+    if eventAddr == nil then
+        return
+    end
+
+    builder:write(eventAddr)
+
+    return eventAddr
+end
+
+
 local function handleClient(client)
     while true do
         local packetType, payload, err = client:readPacket()
@@ -254,9 +277,14 @@ local function handleClient(client)
                             local unitPtr = unitPointers[i]
                             if unitPtr ~= nil then
                                 -- Check if unit was previously REMU'd.
-                                -- TODO: handle Eirika / Ephraim
                                 local unitStatus = memory.read_u32_le(unitPtr + 0x0C)
-                                if bit.band(unitStatus, 0x04010000) ~= 0 then
+                                local unitRemoved = (bit.band(unitStatus, 0x04010000) ~= 0)
+                                
+                                -- 
+                                if unitRemoved and not (
+                                    ((i == 0x01) and (curChapter == 0x3E or (curChapter >= 0x17 and curChapter <= 0x1C))) or
+                                    ((i == 0x0F) and (curChapter == 0x3D or (curChapter >= 0x0A and curChapter <= 0x0F)))
+                                ) then
                                     local evtAddr = setupAppearEvent(i)
                                     enqueuePlayerPhaseEvent(evtAddr, 3, true)
                                     queuedAppearEvents[i] = evtAddr
@@ -296,6 +324,12 @@ local function handleClient(client)
                 awaitingActiveEvent = false
                 client:writePacket(1, net.packBinaryString("41", id, 1))
             end
+        elseif packetType == 3 then
+            -- Trigger game over
+            local id = net.unpackBinaryString("4", payload)
+            local evtAddr = setupGameOverEvent()
+            enqueuePlayerPhaseEvent(evtAddr, 3, true)
+            client:writePacket(1, net.packBinaryString("41", id, 1))
         end
     end
 end
@@ -307,11 +341,41 @@ local function handleActiveEventRequests()
         return
     end
 
+    local evtType = readU32Symbol("ActiveEventType")
     local evtReq = readU32Symbol("ActiveEventRequest")
-    if evtReq ~= 0 then
+    if evtType == 1 then
+        -- Character recruit event
         net.sendToAllClients(2, net.packBinaryString("4", evtReq))
         awaitingActiveEvent = true
         writeU32Symbol("ActiveEventRequest", 0)
+        writeU32Symbol("ActiveEventType", 0)
+    elseif evtType == 2 then
+        -- Victory event
+        net.sendToAllClients(3, net.packBinaryString("4", evtReq))
+        enqueueActiveResponseEvent(0, 3, false)
+        writeU32Symbol("ActiveEventRequest", 0)
+        writeU32Symbol("ActiveEventType", 0)
+    elseif evtType == 3 then
+        -- Game over event
+        local nDead = 0
+        local deadChars = ""
+
+        for _, unitPtr in pairs(game_data.unitLookup) do
+            local charPtr = memory.read_u32_le(unitPtr)
+            if charPtr ~= 0 then
+                local state = memory.read_u32_le(unitPtr + 0x0C)
+                local charNum = memory.read_u8(charPtr + 4)
+                if charNum < 0x23 and bit.band(state, 0x04) ~= 0 then
+                    deadChars = deadChars .. string.char(charNum)
+                    nDead = nDead + 1
+                end
+            end
+        end
+
+        net.sendToAllClients(4, net.packBinaryString("42", evtReq, nDead) .. deadChars)
+        enqueueActiveResponseEvent(0, 3, false)
+        writeU32Symbol("ActiveEventRequest", 0)
+        writeU32Symbol("ActiveEventType", 0)
     end
 end
 

@@ -217,6 +217,7 @@ class PatcherData:
     player_id: int
     player_name: str
     eirika_route: bool
+    death_link: bool
     characters: List[PatcherCharacterData]
 
     def __init__(
@@ -226,6 +227,7 @@ class PatcherData:
         player_id: int,
         player_name: str,
         eirika_route: bool,
+        death_link: bool,
         characters: List[PatcherCharacterData],
     ):
         self.seed_name = seed_name
@@ -233,6 +235,7 @@ class PatcherData:
         self.player_id = player_id
         self.player_name = player_name
         self.eirika_route = eirika_route
+        self.death_link = death_link
         self.characters = characters
 
     def to_dict(self) -> dict:
@@ -242,6 +245,7 @@ class PatcherData:
             "player_name": self.player_name,
             "player_id": self.player_id,
             "eirika_route": self.eirika_route,
+            "death_link": self.death_link,
             "characters": [data.to_dict() for data in self.characters],
         }
 
@@ -253,6 +257,7 @@ class PatcherData:
             src["player_id"],
             src["player_name"],
             src["eirika_route"],
+            src["death_link"],
             [PatcherCharacterData.from_dict(data) for data in src["characters"]],
         )
 
@@ -537,6 +542,8 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
     linker.duplicate_and_shim_thumb("LoadRNState", "XorshiftLoad")
     linker.duplicate_and_shim_thumb("StoreRNState", "XorshiftStore")
 
+    linker.duplicate_and_shim_thumb("sub_8085374", "OnGameOver")
+
     linker.add_section(
         "ap_data",
         bytearray(connector_port.to_bytes(2, "little", signed=False)),
@@ -608,6 +615,10 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
     for village_cond in constants.characters.REQUIRED_VILLAGE_DESTROYED_EVENTS:
         cond = evt_patches.get_event_condition(village_cond)
         cond.evolve(complete_flag=0x65).save()
+
+    for ev_addr in constants.characters.FINAL_BOSS_DEFEAT_EVENTS:
+        patcher = evt_patches.get_patcher(ev_addr)
+        patcher.asmc("ASMCSendVictoryEvent", position=0)
 
     evt_patches.finalize()
 
