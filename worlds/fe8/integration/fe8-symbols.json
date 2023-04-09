@@ -673,6 +673,13 @@
         "space": "rom"
       },
       {
+        "name": "gProc_StdEventEngine",
+        "offset": 5839552,
+        "size": null,
+        "type": 2,
+        "space": "rom"
+      },
+      {
         "name": "gCharacterData",
         "offset": 8404324,
         "size": null,

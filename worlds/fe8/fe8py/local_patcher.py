@@ -543,6 +543,7 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
     linker.duplicate_and_shim_thumb("StoreRNState", "XorshiftStore")
 
     linker.duplicate_and_shim_thumb("sub_8085374", "OnGameOver")
+    linker.duplicate_and_shim_thumb("TickActiveFactionTurn", "OnTickActiveFactionTurn")
 
     linker.add_section(
         "ap_data",

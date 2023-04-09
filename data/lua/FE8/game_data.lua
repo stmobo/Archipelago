@@ -140,6 +140,18 @@ function canEnqueueEvents()
     return false
 end
 
+function isWorldMapRunning()
+    return findProc(getSymbolAddress("gUnknown_08A3EE74")) ~= nil
+end
+
+function isBattleMapRunning()
+    return findProc(getSymbolAddress("gProc_BMapMain")) ~= nil
+end
+
+function eventEngineRunning()
+    return findProc(getSymbolAddress("gProc_StdEventEngine")) ~= nil
+end
+
 EventBuilder = {}
 function EventBuilder:new()
     local o = {

@@ -5,6 +5,7 @@ local rm = require("romalloc")
 
 local playerPhaseEventAllocs = {};
 local queuedAppearEvents = {};
+local queuedDisappearEvents = {};
 local activeEventAllocs = {};
 local awaitingActiveEvent = false;
 
@@ -58,6 +59,7 @@ end
 
 local function cleanupEventAllocs()
     if (readU32Symbol("PPEventQueue") == 0) and (readU8Symbol("PPEventActiveFlag") == 0) and (#playerPhaseEventAllocs > 0) then
+        console.write("All player-phase events cleared.\n")
         for i=1, #playerPhaseEventAllocs do
             rm.free(playerPhaseEventAllocs[i])
         end
@@ -66,10 +68,12 @@ local function cleanupEventAllocs()
     end
 
     if (readU32Symbol("ActiveEventRequest") == 0) and (readU32Symbol("ActiveEventType") == 0) and (readU32Symbol("ActiveEventResponse") == 0) and (#activeEventAllocs > 0) then
+        console.write("All active request events cleared.\n")
         for i=1, #activeEventAllocs do
             rm.free(activeEventAllocs[i])
         end
         activeEventAllocs = {}
+        queuedDisappearEvents = {}
     end
 end
 
@@ -137,6 +141,8 @@ end
 local function setupTextboxEvent(textId)
     local builder = game_data.EventBuilder:new()
 
+    -- EVBIT_MODIFY 3
+    builder:push_u16(0x1020, 3)
     -- SETVAL sB 0xFFFFFFFF
     builder:push_u16(0x0540, 0xB)
     builder:push_u32(0xFFFFFFFF)
@@ -167,6 +173,8 @@ local function setupAppearEvent(charId)
     local asmcAddr = game_data.getSymbolAddress("ASMCPrepareUnitAppearEffect")
     local builder = game_data.EventBuilder:new()
 
+    -- EVBIT_MODIFY 3
+    builder:push_u16(0x1020, 3)
     -- SETVAL s1 charId
     builder:push_u16(0x0540, 1)
     builder:push_u32(charId)
@@ -218,10 +226,39 @@ local function setupAppearEvent(charId)
     return eventAddr
 end
 
+local function setupUnitDisappearEvent(charId)
+    local asmcAddr = game_data.getSymbolAddress("ASMCPrepareUnitDisappearEffect")
+    local builder = game_data.EventBuilder:new()
+
+    -- EVBIT_MODIFY 3
+    builder:push_u16(0x1020, 3)
+    -- SETVAL s1 charId
+    builder:push_u16(0x0540, 1)
+    builder:push_u32(charId)
+    -- ASMC ...
+    builder:push_u16(0x0D40, 0)
+    builder:push_u32(bit.bor(asmcAddr, 1))
+    -- EVBIT_T 7
+    builder:push_u16(0x0228, 7)
+    -- ENDA
+    builder:push_u16(0x0120, 0)
+
+    local eventAddr = rm.romalloc(builder:size())
+    if eventAddr == nil then
+        return
+    end
+
+    builder:write(eventAddr)
+
+    return eventAddr
+end
+
 local function setupGameOverEvent()
     local asmcAddr = game_data.getSymbolAddress("ASMCTriggerGameOver")
     local builder = game_data.EventBuilder:new()
 
+    -- EVBIT_MODIFY 3
+    builder:push_u16(0x1020, 3)
     -- ASMC ...
     builder:push_u16(0x0D40, 0)
     builder:push_u32(bit.bor(asmcAddr, 1))
@@ -254,49 +291,60 @@ local function handleClient(client)
             local id = net.unpackBinaryString("4", payload)
             local unitPointers = {}
 
+
             -- Make sure we're in a context where enqueuing events makes sense.
             if game_data.canEnqueueEvents() then
                 for _, unitPtr in pairs(game_data.unitLookup) do
                     local charPtr = memory.read_u32_le(unitPtr)
                     if charPtr ~= 0 then
                         local charNum = memory.read_u8(charPtr + 4)
-                        unitPointers[charNum] = unitPtr
+                        if unitPointers[charNum] == nil then
+                            unitPointers[charNum] = {}
+                        end
+                        table.insert(unitPointers[charNum], unitPtr)
                     end
                 end
 
                 local availSymAddr = game_data.getSymbolAddress("IsCharacterAvailable")
                 local prevAvailStatus = memory.read_bytes_as_array(availSymAddr + 1, 0x22)
                 local newAvailStatus = {string.byte(payload, 5, 0x26)}
+                local eventsActive = game_data.eventEngineRunning()
                 memory.write_bytes_as_array(availSymAddr + 1, newAvailStatus)
 
                 -- Sync unlocked characters
                 for i=1, 0x22 do
-                    if newAvailStatus[i] ~= 0 then
-                        -- Skip sync for characters who already have an appearance event queued
-                        if queuedAppearEvents[i] == nil then
-                            local unitPtr = unitPointers[i]
-                            if unitPtr ~= nil then
-                                -- Check if unit was previously REMU'd.
-                                local unitStatus = memory.read_u32_le(unitPtr + 0x0C)
-                                local unitRemoved = (bit.band(unitStatus, 0x04010000) ~= 0)
-                                
-                                -- 
-                                if unitRemoved and not (
-                                    ((i == 0x01) and (curChapter == 0x3E or (curChapter >= 0x17 and curChapter <= 0x1C))) or
-                                    ((i == 0x0F) and (curChapter == 0x3D or (curChapter >= 0x0A and curChapter <= 0x0F)))
-                                ) then
-                                    local evtAddr = setupAppearEvent(i)
-                                    enqueuePlayerPhaseEvent(evtAddr, 3, true)
-                                    queuedAppearEvents[i] = evtAddr
+                    -- Skip sync for characters who already have an appearance event queued
+                    if queuedAppearEvents[i] == nil then
+                        local unitPtrList = unitPointers[i]
+                        if unitPtrList ~= nil and #unitPtrList > 0 then
+                            for j=1,#unitPtrList do
+                                local unitPtr = unitPtrList[j]
+                                if newAvailStatus[i] ~= 0 then
+                                    -- Check if unit was previously REMU'd.
+                                    local unitStatus = memory.read_u32_le(unitPtr + 0x0C)
+                                    local unitRemoved = (bit.band(unitStatus, 0x04010000) ~= 0)
+                                    
+                                    if unitRemoved and not (
+                                        ((i == 0x01) and (curChapter == 0x3E or (curChapter >= 0x17 and curChapter <= 0x1C))) or
+                                        ((i == 0x0F) and (curChapter == 0x3D or (curChapter >= 0x0A and curChapter <= 0x0F)))
+                                    ) and (queuedAppearEvents[i] == nil) then
+                                        local evtAddr = setupAppearEvent(i)
+                                        enqueuePlayerPhaseEvent(evtAddr, 3, true)
+                                        queuedAppearEvents[i] = evtAddr
+                                    end
+                                elseif not (awaitingActiveEvent or (#activeEventAllocs > 0) or (queuedDisappearEvents[i] ~= nil) or eventsActive) then
+                                    -- Make sure unit is properly REMU'd.
+                                    local unitStatus = memory.read_u32_le(unitPtr + 0x0C)
+                                    memory.write_u32_le(unitPtr + 0x0C, bit.bor(unitStatus, 0x04210009))
                                 end
-                            elseif prevAvailStatus[i] == 0 then
-                                -- Unit was not previously available but also doesn't have a unit pointer yet.
-                                -- Enqueue a text box event for them.
-                                local textIdx = readU16Symbol("UnitReceivedTextIds", (i * 2))
-                                local evtAddr = setupTextboxEvent(textIdx)
-                                enqueuePlayerPhaseEvent(evtAddr, 3, true)
-                                queuedAppearEvents[i] = evtAddr
                             end
+                        elseif newAvailStatus[i] ~= 0 and prevAvailStatus[i] == 0 then
+                            -- Unit was not previously available but also doesn't have a unit pointer yet.
+                            -- Enqueue a text box event for them.
+                            local textIdx = readU16Symbol("UnitReceivedTextIds", (i * 2))
+                            local evtAddr = setupTextboxEvent(textIdx)
+                            enqueuePlayerPhaseEvent(evtAddr, 3, true)
+                            queuedAppearEvents[i] = evtAddr
                         end
                     end
                 end
@@ -317,6 +365,7 @@ local function handleClient(client)
                         local charId = net.unpackBinaryString("2", string.sub(payload, startIdx, startIdx + 2))
                         local textIdx = readU16Symbol("UnitSentTextIds", (charId * 2))
                         local evtAddr = setupTextboxEvent(textIdx)
+                        queuedDisappearEvents[charId] = evtAddr
                         enqueueActiveResponseEvent(evtAddr, 3, false)
                     end
                 end
@@ -328,7 +377,7 @@ local function handleClient(client)
             -- Trigger game over
             local id = net.unpackBinaryString("4", payload)
             local evtAddr = setupGameOverEvent()
-            enqueuePlayerPhaseEvent(evtAddr, 3, true)
+            enqueuePlayerPhaseEvent(evtAddr, 3, false)
             client:writePacket(1, net.packBinaryString("41", id, 1))
         end
     end
