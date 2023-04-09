@@ -6,27 +6,18 @@ import os.path as osp
 import random
 import subprocess as sp
 from pathlib import Path
-from typing import Optional, Set
+from typing import Dict, Optional, Set
 
 import Utils
-from CommonClient import (
-    ClientCommandProcessor,
-    CommonContext,
-    get_base_parser,
-    gui_enabled,
-    logger,
-    server_loop,
-)
+from CommonClient import (ClientCommandProcessor, CommonContext,
+                          get_base_parser, gui_enabled, logger, server_loop)
 from Utils import async_start
 from worlds.fe8 import fe8py
-from worlds.fe8.fe8py.connector import (
-    CharacterRecruitEvent,
-    ConnectionClosedError,
-    ConnectionTimeoutError,
-    FE8Connection,
-    KeepaliveEvent,
-)
-from worlds.fe8.fe8py.constants.characters import CharacterSlot
+from worlds.fe8.fe8py.connector import (CharacterRecruitEvent,
+                                        ConnectionClosedError,
+                                        ConnectionTimeoutError, FE8Connection,
+                                        KeepaliveEvent)
+from worlds.fe8.fe8py.constants.characters import CharacterFill, CharacterSlot
 from worlds.fe8.fe8py.local_patcher import PatcherData, patch_rom
 from worlds.fe8.fe8py.rom import ROM
 
@@ -79,20 +70,22 @@ async def run_game(romfile):
 async def handle_connector_events(
     ctx: FE8Context, patch_data: PatcherData, connection: FE8Connection
 ):
+    item_id_to_slot: Dict[int, CharacterSlot] = {}
+    slot_id_to_location_id: Dict[int, Optional[int]] = {}
+
+    for character in patch_data.characters:
+        item_id_to_slot[character.receive_item.item_id] = character.slot
+        slot_id_to_location_id[character.slot.id] = character.location_id
+
     while True:
         event = await connection.get_event()
         if isinstance(event, KeepaliveEvent):
             unlocked_chars = set()
             for character in patch_data.characters:
                 if character.precollected:
-                    # logger.info(
-                    #     f"Have character {character.slot.id:02X} ({character.slot.name})"
-                    # )
                     unlocked_chars.add(character.slot.id)
             for item in ctx.items_received:
-                slot = CharacterSlot.from_ap_id(item.item)
-                # logger.info(f"Have character {slot.id:02X} ({slot.name})")
-                unlocked_chars.add(slot.id)
+                unlocked_chars.add(item_id_to_slot[item.item].id)
             await connection.sync_unlocked_units(sorted(unlocked_chars))
         elif isinstance(event, CharacterRecruitEvent):
             new_chars = [
@@ -102,7 +95,7 @@ async def handle_connector_events(
             ]
 
             location_ids = [
-                CharacterSlot.from_id(char_id).ap_id for char_id in event.characters
+                slot_id_to_location_id[char_id] for char_id in event.characters
             ]
 
             await asyncio.gather(

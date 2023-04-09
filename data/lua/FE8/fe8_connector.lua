@@ -242,24 +242,32 @@ local function handleClient(client)
                 end
 
                 local availSymAddr = game_data.getSymbolAddress("IsCharacterAvailable")
-                memory.write_bytes_as_array(availSymAddr + 1, {string.byte(payload, 5, 0x26)})
+                local prevAvailStatus = memory.read_bytes_as_array(availSymAddr + 1, 0x22)
+                local newAvailStatus = {string.byte(payload, 5, 0x26)}
+                memory.write_bytes_as_array(availSymAddr + 1, newAvailStatus)
 
                 -- Sync unlocked characters
                 for i=1, 0x22 do
-                    local nowAvailable = (string.byte(payload, 4 + i) == 1)
-                    if nowAvailable then
+                    if newAvailStatus[i] ~= 0 then
                         -- Skip sync for characters who already have an appearance event queued
                         if queuedAppearEvents[i] == nil then
                             local unitPtr = unitPointers[i]
                             if unitPtr ~= nil then
                                 -- Check if unit was previously REMU'd.
+                                -- TODO: handle Eirika / Ephraim
                                 local unitStatus = memory.read_u32_le(unitPtr + 0x0C)
                                 if bit.band(unitStatus, 0x04010000) ~= 0 then
-                                    console.write("enqueuing appearance event\n")
                                     local evtAddr = setupAppearEvent(i)
                                     enqueuePlayerPhaseEvent(evtAddr, 3, true)
                                     queuedAppearEvents[i] = evtAddr
                                 end
+                            elseif prevAvailStatus[i] == 0 then
+                                -- Unit was not previously available but also doesn't have a unit pointer yet.
+                                -- Enqueue a text box event for them.
+                                local textIdx = readU16Symbol("UnitReceivedTextIds", (i * 2))
+                                local evtAddr = setupTextboxEvent(textIdx)
+                                enqueuePlayerPhaseEvent(evtAddr, 3, true)
+                                queuedAppearEvents[i] = evtAddr
                             end
                         end
                     end

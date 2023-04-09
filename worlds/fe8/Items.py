@@ -34,7 +34,7 @@ class FE8Item(Item):
         return cls(
             fill.name,
             ItemClassification.progression,
-            slot.ap_id,
+            fill.ap_id,
             player,
             char_slot=slot,
             char_fill=fill,

@@ -212,6 +212,15 @@ NAMES = {
     TANA: "Tana",
 }
 
+AP_ITEM_NAMES_TO_IDS = {}
+AP_LOCATION_NAMES_TO_IDS = {}
+
+for character_id in PLAYABLE_CHARACTERS:
+    ap_id = AP_CHARACTER_ID_START + character_id
+    name = NAMES[character_id]
+    AP_ITEM_NAMES_TO_IDS[name] = ap_id
+    AP_LOCATION_NAMES_TO_IDS[f"Recruit {name}"] = ap_id
+
 PORTRAIT_IDS = {
     EIRIKA: [0x02, 0x03],
     SETH: [0x04],

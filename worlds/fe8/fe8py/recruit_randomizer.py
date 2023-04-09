@@ -75,26 +75,25 @@ class CharacterPool:
 class CharacterAssignments:
     pool: CharacterPool
     fill_name_lookup: Dict[str, Tuple[CharacterSlot, CharacterFill]]
-    slot_ap_id_lookup: Dict[int, Tuple[CharacterSlot, CharacterFill]]
+    fill_ap_id_lookup: Dict[int, Tuple[CharacterSlot, CharacterFill]]
     slot_char_id_lookup: Dict[int, Tuple[CharacterSlot, CharacterFill]]
 
     def __init__(self, pool: CharacterPool):
         self.pool = pool
         self.fill_name_lookup = {}
-        self.slot_ap_id_lookup = {}
+        self.fill_ap_id_lookup = {}
         self.slot_char_id_lookup = {}
 
         for (slot, fill) in pool.iter_all():
-            # Items are named according to fill character, but use the ID of their assigned slot.
-            self.slot_ap_id_lookup[slot.ap_id] = (slot, fill)
+            self.fill_ap_id_lookup[fill.ap_id] = (slot, fill)
             self.slot_char_id_lookup[slot.id] = (slot, fill)
             self.fill_name_lookup[fill.name] = (slot, fill)
 
     def item_name_to_id(self, item_name: str) -> int:
-        return self.fill_name_lookup[item_name][0].ap_id
+        return self.fill_name_lookup[item_name][1].ap_id
 
     def item_id_to_name(self, item_id: int) -> str:
-        return self.slot_ap_id_lookup[item_id][1].name
+        return self.fill_ap_id_lookup[item_id][1].name
 
     def slot_character_to_item_name(self, slot_id: int) -> str:
         return self.slot_char_id_lookup[slot_id][1].name

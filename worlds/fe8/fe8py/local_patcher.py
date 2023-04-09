@@ -159,6 +159,7 @@ class PatcherCharacterData:
     send_item: Optional[
         PatcherItemData
     ]  # Item we'll send once this character is recruited, if any
+    location_id: Optional[int]  # ID of this character's recruitment location
     precollected: bool  # if True, this character is in our starting inventory
 
     def __init__(
@@ -167,12 +168,14 @@ class PatcherCharacterData:
         fill: CharacterFill,
         receive_item: PatcherItemData,
         send_item: Optional[PatcherItemData],
+        location_id: Optional[int],
         precollected: bool,
     ):
         self.slot = slot
         self.fill = fill
         self.receive_item = receive_item
         self.send_item = send_item
+        self.location_id = location_id
         self.precollected = precollected
 
     def to_dict(self) -> dict:
@@ -185,6 +188,9 @@ class PatcherCharacterData:
 
         if self.send_item is not None:
             ret["send_item"] = self.send_item.to_dict()
+
+        if self.location_id is not None:
+            ret["location_id"] = self.location_id
 
         return ret
 
@@ -200,6 +206,7 @@ class PatcherCharacterData:
             CharacterFill.from_id(src["fill"]),
             PatcherItemData.from_dict(src["receive_item"]),
             send_item,
+            src.get("location_id", None),
             src["precollected"],
         )
 
@@ -476,11 +483,10 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
     char_send_text_ids = [0] * 0x23
     for char_data in patch_data.characters:
         slot_id = char_data.slot.id
-        character = new_rom.get_character(char_data.fill.id)
         char_recv_text_ids[slot_id] = len(new_rom.messages)
 
         msg_text = b"Received \x80\x21"
-        msg_text += character.name.encode("utf-8")
+        msg_text += char_data.receive_item.item_name.encode("utf-8")
         if char_data.receive_item.player_id != patch_data.player_id:
             msg_text += b"\x80\x21 from \x80\x21"
             msg_text += char_data.receive_item.player_name.encode("utf-8")

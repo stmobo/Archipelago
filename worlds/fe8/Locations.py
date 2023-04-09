@@ -2,23 +2,17 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
-from BaseClasses import CollectionState, Entrance, Item, Location, MultiWorld, Region
+from BaseClasses import (CollectionState, Entrance, Item, Location, MultiWorld,
+                         Region)
 
-from .fe8py.constants.characters import (
-    CHAPTER_EXIT_REQUIREMENTS,
-    CHAPTER_LINKS,
-    CHAPTER_NAMES,
-    CHAPTER_SHORT_NAMES,
-    COMMON_CHAPTERS,
-    EIRIKA,
-    EIRIKA_CHAPTERS,
-    EPHRAIM_CHAPTERS,
-    RECRUITMENTS_BY_CHAPTER,
-    SETH,
-    CharacterFill,
-    CharacterSlot,
-    Recruitment,
-)
+from .fe8py.constants.characters import (CHAPTER_EXIT_REQUIREMENTS,
+                                         CHAPTER_LINKS, CHAPTER_NAMES,
+                                         CHAPTER_SHORT_NAMES, COMMON_CHAPTERS,
+                                         EIRIKA, EIRIKA_CHAPTERS,
+                                         EPHRAIM_CHAPTERS,
+                                         RECRUITMENTS_BY_CHAPTER, SETH,
+                                         CharacterFill, CharacterSlot,
+                                         Recruitment)
 from .fe8py.recruit_randomizer import CharacterAssignments
 from .Items import FE8Item
 
@@ -66,8 +60,8 @@ def create_region(
         slot, fill = assignments.slot_char_id_lookup[recruitment.character_id]
         location = FE8Location(
             player,
-            f"{CHAPTER_SHORT_NAMES[chapter_id]} - Recruit {fill.name}",
-            slot.ap_id,
+            f"Recruit {fill.name}",
+            fill.ap_id,
             region,
             recruitment=recruitment,
             char_slot=slot,

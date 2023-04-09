@@ -4,15 +4,18 @@ import json
 import os.path as osp
 from typing import Dict
 
-from BaseClasses import (Entrance, Item, ItemClassification, Location,
-                         MultiWorld, Region)
+from BaseClasses import Entrance, Item, ItemClassification, Location, MultiWorld, Region
 
 from ..AutoWorld import WebWorld, World
-from .fe8py.constants.characters import AP_ID_OFFSET, EIRIKA, EPHRAIM, SETH
-from .fe8py.local_patcher import (PatcherCharacterData, PatcherData,
-                                  PatcherItemData)
-from .fe8py.recruit_randomizer import (CharacterAssignments,
-                                       randomize_recruit_order)
+from .fe8py.constants.characters import (
+    AP_ITEM_NAMES_TO_IDS,
+    AP_LOCATION_NAMES_TO_IDS,
+    EIRIKA,
+    EPHRAIM,
+    SETH,
+)
+from .fe8py.local_patcher import PatcherCharacterData, PatcherData, PatcherItemData
+from .fe8py.recruit_randomizer import CharacterAssignments, randomize_recruit_order
 from .Items import FE8Item
 from .Locations import FE8Location, create_chapter_regions
 from .Options import fe8_options
@@ -28,9 +31,8 @@ class FE8World(World):
     topology_present = False
     data_version = 1
 
-    # Item and location names are switched around per-player based on recruit order randomization.
-    item_name_to_id = {}
-    location_name_to_id = {}
+    item_name_to_id = AP_ITEM_NAMES_TO_IDS
+    location_name_to_id = AP_LOCATION_NAMES_TO_IDS
 
     character_assignments: CharacterAssignments
     eirika_route: bool
@@ -155,11 +157,12 @@ class FE8World(World):
                 receive_item = PatcherItemData(
                     src_player,
                     self.multiworld.player_name[src_player],
-                    slot.ap_id,
-                    fill.name,
+                    char_item.code,
+                    char_item.name,
                 )
 
                 recruit_loc = self.character_recruit_locations[slot.id]
+                loc_id = recruit_loc.address
                 send_item = PatcherItemData(
                     recruit_loc.item.player,
                     self.multiworld.player_name[recruit_loc.item.player],
@@ -170,13 +173,16 @@ class FE8World(World):
                 receive_item = PatcherItemData(
                     self.player,
                     self.multiworld.player_name[self.player],
-                    slot.ap_id,
-                    fill.name,
+                    char_item.code,
+                    char_item.name,
                 )
                 send_item = None
+                loc_id = None
 
             character_data.append(
-                PatcherCharacterData(slot, fill, receive_item, send_item, precollected)
+                PatcherCharacterData(
+                    slot, fill, receive_item, send_item, loc_id, precollected
+                )
             )
 
         patcher_data = PatcherData(
