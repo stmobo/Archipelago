@@ -4,18 +4,17 @@ import json
 import os.path as osp
 from typing import Dict
 
-from BaseClasses import Entrance, Item, ItemClassification, Location, MultiWorld, Region
+from BaseClasses import (Entrance, Item, ItemClassification, Location,
+                         MultiWorld, Region)
 
 from ..AutoWorld import WebWorld, World
-from .fe8py.constants.characters import (
-    AP_ITEM_NAMES_TO_IDS,
-    AP_LOCATION_NAMES_TO_IDS,
-    EIRIKA,
-    EPHRAIM,
-    SETH,
-)
-from .fe8py.local_patcher import PatcherCharacterData, PatcherData, PatcherItemData
-from .fe8py.recruit_randomizer import CharacterAssignments, randomize_recruit_order
+from .fe8py.constants.characters import (AP_ITEM_NAMES_TO_IDS,
+                                         AP_LOCATION_NAMES_TO_IDS, EIRIKA,
+                                         EPHRAIM, SETH)
+from .fe8py.local_patcher import (PatcherCharacterData, PatcherData,
+                                  PatcherItemData)
+from .fe8py.recruit_randomizer import (CharacterAssignments,
+                                       randomize_recruit_order)
 from .Items import FE8Item
 from .Locations import FE8Location, create_chapter_regions
 from .Options import fe8_options
@@ -41,12 +40,19 @@ class FE8World(World):
     character_items: Dict[int, FE8Item]  # slot character ID to Item
 
     def generate_early(self):
-        self.character_assignments = randomize_recruit_order(
-            self.multiworld.random,
-            get_options(
-                self.multiworld, "disable_crossgender_recruitment", self.player
-            ),
+        randomized_recruitment = get_options(
+            self.multiworld, "randomized_recruitment", self.player
         )
+
+        if randomized_recruitment:
+            self.character_assignments = randomize_recruit_order(
+                self.multiworld.random,
+                get_options(
+                    self.multiworld, "disable_crossgender_recruitment", self.player
+                ),
+            )
+        else:
+            self.character_assignments = CharacterAssignments.identity_map()
 
         route = get_options(self.multiworld, "route", self.player)
         self.eirika_route = route == 0

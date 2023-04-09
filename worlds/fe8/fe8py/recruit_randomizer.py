@@ -1,8 +1,9 @@
-import random
-from typing import Callable, Dict, Iterator, List, Tuple
+from __future__ import annotations
 
-from .constants.characters import (PLAYABLE_CHARACTERS, CharacterFill,
-                                   CharacterSlot)
+import random
+from typing import Callable, Dict, Iterable, Iterator, List, Tuple
+
+from .constants.characters import PLAYABLE_CHARACTERS, CharacterFill, CharacterSlot
 
 
 class CharacterPool:
@@ -49,6 +50,11 @@ class CharacterPool:
         self.rng.shuffle(fill_ids)
         self.assigned_ids.update(zip(slot_ids, fill_ids))
 
+    def fill_identity_map(self):
+        for id in self.slots.keys():
+            if id not in self.assigned_ids:
+                self.assigned_ids[id] = id
+
     def assign(
         self,
         slot_filter: Callable[[CharacterSlot], bool],
@@ -88,6 +94,12 @@ class CharacterAssignments:
             self.fill_ap_id_lookup[fill.ap_id] = (slot, fill)
             self.slot_char_id_lookup[slot.id] = (slot, fill)
             self.fill_name_lookup[fill.name] = (slot, fill)
+
+    @classmethod
+    def identity_map(cls) -> CharacterAssignments:
+        pool = CharacterPool(None, False)
+        pool.fill_identity_map()
+        return cls(pool)
 
     def item_name_to_id(self, item_name: str) -> int:
         return self.fill_name_lookup[item_name][1].ap_id
