@@ -4,12 +4,15 @@ import json
 import os.path as osp
 from typing import Dict
 
-from BaseClasses import Entrance, Item, ItemClassification, Location, MultiWorld, Region
+from BaseClasses import (Entrance, Item, ItemClassification, Location,
+                         MultiWorld, Region)
 
 from ..AutoWorld import WebWorld, World
 from .fe8py.constants.characters import AP_ID_OFFSET, EIRIKA, EPHRAIM, SETH
-from .fe8py.local_patcher import PatcherCharacterData, PatcherData, PatcherItemData
-from .fe8py.recruit_randomizer import CharacterAssignments, randomize_recruit_order
+from .fe8py.local_patcher import (PatcherCharacterData, PatcherData,
+                                  PatcherItemData)
+from .fe8py.recruit_randomizer import (CharacterAssignments,
+                                       randomize_recruit_order)
 from .Items import FE8Item
 from .Locations import FE8Location, create_chapter_regions
 from .Options import fe8_options
@@ -49,9 +52,6 @@ class FE8World(World):
         self.character_items = {}
 
         for slot, fill in self.character_assignments.pool.iter_all():
-            print(
-                f"created item for {slot.name}/{fill.name} ({slot.id}, AP ID: {slot.ap_id})"
-            )
             item = FE8Item.from_character_assignment(self.player, slot, fill)
             self.character_items[slot.id] = item
 

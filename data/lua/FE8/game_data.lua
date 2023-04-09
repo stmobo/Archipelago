@@ -2,7 +2,7 @@ module("game_data", package.seeall)
 
 local descriptorBaseAddress = 0x09000000
 local symbolTable = {}
-local unitLookup = {}
+unitLookup = {}
 local freeROMStart = 0;
 
 function getSymbol(name)
@@ -109,6 +109,35 @@ function getAllPlayableCharacterUnits()
     end
 
     return ret
+end
+
+function findProc(scriptAddr)
+    local procArray = getSymbolAddress("sProcArray")
+    for i=0, 63 do
+        local curProcAddr = procArray + (i * 0x6C)
+        -- proc script pointer is at +0
+        if memory.read_u32_le(curProcAddr) == scriptAddr then
+            return curProcAddr
+        end
+    end
+
+    return nil
+end
+
+function canEnqueueEvents()
+    local bmProc = getSymbolAddress("gProc_BMapMain")
+    local wmProc = getSymbolAddress("gUnknown_08A3EE74")
+    local procArray = getSymbolAddress("sProcArray")
+    for i=0, 63 do
+        local curProcAddr = procArray + (i * 0x6C)
+        local scriptAddr = memory.read_u32_le(curProcAddr)
+        -- proc script pointer is at +0
+        if scriptAddr == bmProc or scriptAddr == wmProc then
+            return true
+        end
+    end
+
+    return false
 end
 
 EventBuilder = {}

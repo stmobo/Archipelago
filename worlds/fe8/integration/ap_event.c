@@ -303,8 +303,8 @@ void ASMCPrepareUnitAppearEffect(ProcPtr parent) {
         gEventSlots[1] = 2;
         gEventSlots[2] = UnitReceivedTextIds[charId];
     } else {
-        /* Check if unit was previously REMU'd or is undeployed */
-        if ((unit->state & 0x04010008) == 0) {
+        /* Check if unit was previously REMU'd */
+        if ((unit->state & 0x04010000) == 0) {
             return;
         }
 

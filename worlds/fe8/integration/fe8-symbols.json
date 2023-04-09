@@ -15,6 +15,27 @@
       "space": "rom"
     },
     {
+      "name": "sProcArray",
+      "offset": 151144,
+      "size": 6912,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "sProcAllocList",
+      "offset": 158056,
+      "size": 260,
+      "type": 1,
+      "space": "wram"
+    },
+    {
+      "name": "sProcAllocListHead",
+      "offset": 158316,
+      "size": 4,
+      "type": 1,
+      "space": "wram"
+    },
+    {
       "name": "GetBattleUnitExpGain",
       "offset": 181556,
       "size": 130,
@@ -425,6 +446,13 @@
       "offset": 178728,
       "size": 470,
       "type": 3,
+      "space": "rom"
+    },
+    {
+      "name": "gProc_BMapMain",
+      "offset": 5874160,
+      "size": 584,
+      "type": 2,
       "space": "rom"
     },
     {

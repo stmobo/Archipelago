@@ -4,6 +4,7 @@ local game_data = require("game_data")
 local rm = require("romalloc")
 
 local playerPhaseEventAllocs = {};
+local queuedAppearEvents = {};
 local activeEventAllocs = {};
 local awaitingActiveEvent = false;
 
@@ -61,6 +62,7 @@ local function cleanupEventAllocs()
             rm.free(playerPhaseEventAllocs[i])
         end
         playerPhaseEventAllocs = {}
+        queuedAppearEvents = {}
     end
 
     if (readU32Symbol("ActiveEventRequest") == 0) and (readU32Symbol("ActiveEventResponse") == 0) and (#activeEventAllocs > 0) then
@@ -226,26 +228,42 @@ local function handleClient(client)
 
         if packetType == 1 then
             local curChapter = readU8Symbol("gRAMChapterData", 0x0E)
-            local availSymName = "BaseAvailabilityCh" .. tostring(curChapter)
             local id = net.unpackBinaryString("4", payload)
+            local unitPointers = {}
 
-            if game_data.getSymbolAddress(availSymName) ~= nil then
-                -- Sync unlocked characters
-                for i=1, 0x22 do
-                    local prevAvailable = (readU8Symbol("IsCharacterAvailable", charId) ~= 0)
-                    local nowAvailable = (string.byte(payload, 4 + i) == 0)
-                    local prevRecruited = (
-                        readU8Symbol(availSymName, i) == 1
-                    )
-                    writeU8Symbol("IsCharacterAvailable", string.byte(payload, 4 + i), i)
-
-                    if prevRecruited and nowAvailable and not prevAvailable then
-                        local evtAddr = setupAppearEvent(charId)
-                        enqueuePlayerPhaseEvent(evtAddr, 3, true)
+            -- Make sure we're in a context where enqueuing events makes sense.
+            if game_data.canEnqueueEvents() then
+                for _, unitPtr in pairs(game_data.unitLookup) do
+                    local charPtr = memory.read_u32_le(unitPtr)
+                    if charPtr ~= 0 then
+                        local charNum = memory.read_u8(charPtr + 4)
+                        unitPointers[charNum] = unitPtr
                     end
                 end
-            else
-                console.write(string.format("could not find availability map for ch %02X\n", curChapter))
+
+                local availSymAddr = game_data.getSymbolAddress("IsCharacterAvailable")
+                memory.write_bytes_as_array(availSymAddr + 1, {string.byte(payload, 5, 0x26)})
+
+                -- Sync unlocked characters
+                for i=1, 0x22 do
+                    local nowAvailable = (string.byte(payload, 4 + i) == 1)
+                    if nowAvailable then
+                        -- Skip sync for characters who already have an appearance event queued
+                        if queuedAppearEvents[i] == nil then
+                            local unitPtr = unitPointers[i]
+                            if unitPtr ~= nil then
+                                -- Check if unit was previously REMU'd.
+                                local unitStatus = memory.read_u32_le(unitPtr + 0x0C)
+                                if bit.band(unitStatus, 0x04010000) ~= 0 then
+                                    console.write("enqueuing appearance event\n")
+                                    local evtAddr = setupAppearEvent(i)
+                                    enqueuePlayerPhaseEvent(evtAddr, 3, true)
+                                    queuedAppearEvents[i] = evtAddr
+                                end
+                            end
+                        end
+                    end
+                end
             end
             
             client:writePacket(1, net.packBinaryString("41", id, 1))
@@ -254,23 +272,22 @@ local function handleClient(client)
             local id, nEvents = net.unpackBinaryString("41", string.sub(payload, 1, 5))
             if not awaitingActiveEvent then
                 client:writePacket(1, net.packBinaryString("41", id, 0) .. "no active event requests pending")
-                return
-            end
-
-            if nEvents == 0 then
-                enqueueActiveResponseEvent(0, 3, false)
             else
-                for i=1, nEvents do
-                    local startIdx = 6 + ((i - 1) * 2)
-                    local charId = net.unpackBinaryString("2", string.sub(payload, startIdx, startIdx + 2))
-                    local textIdx = readU16Symbol("UnitSentTextIds", (charId * 2))
-                    local evtAddr = setupTextboxEvent(textIdx)
-                    enqueueActiveResponseEvent(evtAddr, 3, false)
+                if nEvents == 0 then
+                    enqueueActiveResponseEvent(0, 3, false)
+                else
+                    for i=1, nEvents do
+                        local startIdx = 6 + ((i - 1) * 2)
+                        local charId = net.unpackBinaryString("2", string.sub(payload, startIdx, startIdx + 2))
+                        local textIdx = readU16Symbol("UnitSentTextIds", (charId * 2))
+                        local evtAddr = setupTextboxEvent(textIdx)
+                        enqueueActiveResponseEvent(evtAddr, 3, false)
+                    end
                 end
-            end
 
-            awaitingActiveEvent = false
-            client:writePacket(1, net.packBinaryString("41", id, 1))
+                awaitingActiveEvent = false
+                client:writePacket(1, net.packBinaryString("41", id, 1))
+            end
         end
     end
 end

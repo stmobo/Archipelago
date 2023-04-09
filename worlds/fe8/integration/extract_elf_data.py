@@ -9,7 +9,6 @@ import time
 from typing import Dict, List, Optional, Tuple, Union
 
 from attrs import asdict, define, field
-
 from fe8py.linker.relocation_types import RELOCATION_TYPES
 from progress_line import ProgressLine
 
@@ -64,7 +63,10 @@ GET_SYMS = [
     "gEventSlots",
     # "ExecMainUpdate",
     # "gMainCallback",
-    # "gProc_BMapMain",
+    "gProc_BMapMain",
+    "sProcArray",
+    "sProcAllocList",
+    "sProcAllocListHead",
     "Proc_Find",
     "Proc_StartBlocking",
     "Proc_Goto",

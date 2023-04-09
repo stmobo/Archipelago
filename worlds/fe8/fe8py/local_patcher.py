@@ -243,8 +243,8 @@ class PatcherData:
         return cls(
             src["seed_name"],
             src["seed"],
-            src["player_name"],
             src["player_id"],
+            src["player_name"],
             src["eirika_route"],
             [PatcherCharacterData.from_dict(data) for data in src["characters"]],
         )
@@ -462,7 +462,7 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
             avail = constants.characters.AVAIL_MAP[ch_id]
             avail_offsets[f"BaseAvailabilityCh{ch_id}"] = len(avail_data)
             for char_id in range(0x23):
-                avail_data += b"1" if char_id in avail else b"0"
+                avail_data += b"\x01" if char_id in avail else b"\x00"
 
     linker.add_section(
         "avail_map",

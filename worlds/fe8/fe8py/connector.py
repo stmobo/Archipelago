@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import asyncio
 import struct
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 HEADER_FMT = ">II"
+KEEPALIVE_TIMEOUT = 15
 
 
 class CommandError(Exception):
@@ -14,6 +15,16 @@ class CommandError(Exception):
 
     def __str__(self) -> str:
         return f"Emulator connector returned error: {self.msg}"
+
+
+class ConnectionClosedError(Exception):
+    def __str__(self) -> str:
+        return f"Server connection closed unexpectedly"
+
+
+class ConnectionTimeoutError(Exception):
+    def __str__(self) -> str:
+        return f"Server connection timed out"
 
 
 class KeepaliveEvent:
@@ -33,7 +44,6 @@ class FE8Connection:
     cur_req_id: int
     request_futures: Dict[int, asyncio.Future]
     events: asyncio.Queue
-    process_task: asyncio.Task
 
     def __init__(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         self.reader = reader
@@ -41,13 +51,11 @@ class FE8Connection:
         self.cur_req_id = 0
         self.request_futures = {}
         self.events = asyncio.Queue()
-        self.process_task = None
 
     @classmethod
     async def connect(cls, host: str, port: int) -> FE8Connection:
         reader, writer = await asyncio.open_connection(host, port)
         ret = cls(reader, writer)
-        ret.process_task = asyncio.create_task(ret.process_incoming_packets())
         return ret
 
     def _init_request(self) -> Tuple[int, asyncio.Future]:
@@ -58,20 +66,36 @@ class FE8Connection:
         self.cur_req_id += 1
         return req_id, fut
 
-    async def write_packet(self, packet_type: int, data: bytes):
+    async def _read_packet(self) -> Tuple[int, bytes]:
+        try:
+            header = await self.reader.readexactly(8)
+            payload_len, packet_type = struct.unpack(HEADER_FMT, header)
+            payload = await self.reader.readexactly(payload_len)
+            return packet_type, payload
+        except asyncio.IncompleteReadError:
+            raise ConnectionClosedError() from None
+
+    async def _write_packet(self, packet_type: int, data: bytes):
         header = struct.pack(HEADER_FMT, len(data), packet_type)
         self.writer.write(header + data)
         await self.writer.drain()
 
-    async def process_incoming_packets(self):
-        while True:
-            header = await self.reader.readexactly(8)
-            payload_len, packet_type = struct.unpack(HEADER_FMT, header)
-            payload = await self.reader.readexactly(payload_len)
+    async def close(self):
+        self.writer.close()
+        await self.writer.wait_closed()
 
-            if packet_type == 0:
+    async def run(self):
+        while True:
+            try:
+                packet_type, payload = await asyncio.wait_for(
+                    self._read_packet(), KEEPALIVE_TIMEOUT
+                )
+            except asyncio.TimeoutError:
+                raise ConnectionTimeoutError() from None
+
+            if packet_type == 0:  # Keepalive
                 self.events.put_nowait(KeepaliveEvent())
-            elif packet_type == 1:
+            elif packet_type == 1:  # Request response
                 req_id = struct.unpack(">I", payload[:4])[0]
                 try:
                     future = self.request_futures[req_id]
@@ -79,7 +103,7 @@ class FE8Connection:
                     del self.request_futures[req_id]
                 except KeyError:
                     pass
-            elif packet_type == 2:
+            elif packet_type == 2:  # Character recruitment event
                 unlocked: Tuple[int, int, int, int] = struct.unpack(
                     ">BBBB", payload[:4]
                 )
@@ -93,7 +117,7 @@ class FE8Connection:
             statuses[char_id - 1] = 1
 
         req_id, fut = self._init_request()
-        await self.write_packet(1, struct.pack(">I34B", req_id, *statuses))
+        await self._write_packet(1, struct.pack(">I34B", req_id, *statuses))
 
         payload: bytes = await fut
         if payload[0] == 1:
@@ -106,7 +130,7 @@ class FE8Connection:
         req_data = struct.pack(">IB", req_id, len(textIds))
         for id in textIds:
             req_data = req_data + id.to_bytes(2, "big", signed=False)
-        await self.write_packet(2, req_data)
+        await self._write_packet(2, req_data)
 
         payload: bytes = await fut
         if payload[0] == 1:
@@ -115,4 +139,6 @@ class FE8Connection:
             raise CommandError(payload[1:].decode("utf-8"))
 
     async def get_event(self) -> Union[KeepaliveEvent, CharacterRecruitEvent]:
+        if self.writer.is_closing():
+            raise ConnectionClosedError()
         return await self.events.get()

@@ -47,11 +47,6 @@ class FE8Location(Location):
         self.char_slot = char_slot
         self.char_fill = char_fill
 
-        if self.char_slot is not None:
-            print(f"created location for {char_slot.name} ({char_slot.id})")
-        else:
-            print(f"created empty location")
-
 
 def create_region(
     world: MultiWorld, player: int, chapter_id: int, assignments: CharacterAssignments
@@ -63,9 +58,6 @@ def create_region(
     )
     world.regions.append(region)
 
-    print(f"Created region {region.name}")
-    recruit_locations = []
-
     for recruitment in RECRUITMENTS_BY_CHAPTER.get(chapter_id, []):
         # Don't put locations down for Eirika and Seth.
         if recruitment.character_id == EIRIKA or recruitment.character_id == SETH:
@@ -74,7 +66,7 @@ def create_region(
         slot, fill = assignments.slot_char_id_lookup[recruitment.character_id]
         location = FE8Location(
             player,
-            f"Recruit {slot.name}",
+            f"{CHAPTER_SHORT_NAMES[chapter_id]} - Recruit {fill.name}",
             slot.ap_id,
             region,
             recruitment=recruitment,
