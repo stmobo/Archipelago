@@ -25,6 +25,7 @@ volatile struct APQueuedEvent *PPEventQueue = NULL;
 volatile u8 PPEventActiveFlag = 0; // used by connector to identify when memory can be freed
 
 u8 triggeredGameOver = 0;
+u8 shouldRefreshBmSprites = 0;
 
 /* Extern items only used by this code */
 extern struct EnqueuedEventCall gEventCallQueue[];
@@ -128,6 +129,13 @@ void PlayerPhase_MainIdleShim(ProcPtr proc) {
         Proc_StartBlocking(PlayerPhaseEventBlockProc, proc);
     } else {
         PPEventActiveFlag = 0;
+        if (shouldRefreshBmSprites) {
+            shouldRefreshBmSprites = 0;
+            RefreshEntityBmMaps();
+            RenderBmMap();
+            RefreshUnitSprites();
+        }
+
         return PlayerPhase_MainIdle(proc);
     }
 }

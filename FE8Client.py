@@ -91,6 +91,25 @@ async def deathlink_handler(ctx: FE8Context, connection: FE8Connection):
         ctx.awaiting_deathlink.clear()
 
 
+async def sync_character_status(
+    ctx: FE8Context,
+    patch_data: PatcherData,
+    connection: FE8Connection,
+    item_id_to_slot: Dict[int, CharacterSlot],
+    *,
+    queue_events: bool = True,
+):
+    unlocked_chars = set()
+    for character in patch_data.characters:
+        if character.precollected:
+            unlocked_chars.add(character.slot.id)
+    for item in ctx.items_received:
+        unlocked_chars.add(item_id_to_slot[item.item].id)
+    await connection.sync_unlocked_units(
+        sorted(unlocked_chars), queue_events=queue_events
+    )
+
+
 async def handle_connector_events(
     ctx: FE8Context, patch_data: PatcherData, connection: FE8Connection
 ):
@@ -103,16 +122,20 @@ async def handle_connector_events(
         slot_id_to_location_id[character.slot.id] = character.location_id
         slot_id_to_fill[character.slot.id] = character.fill
 
+    logger.info("Initial status - have:")
+    for item in ctx.items_received:
+        logger.info(f"{item_id_to_slot[item.item].name}")
+
+    await sync_character_status(
+        ctx, patch_data, connection, item_id_to_slot, queue_events=False
+    )
+
     while True:
         event = await connection.get_event()
         if isinstance(event, KeepaliveEvent):
-            unlocked_chars = set()
-            for character in patch_data.characters:
-                if character.precollected:
-                    unlocked_chars.add(character.slot.id)
-            for item in ctx.items_received:
-                unlocked_chars.add(item_id_to_slot[item.item].id)
-            await connection.sync_unlocked_units(sorted(unlocked_chars))
+            await sync_character_status(
+                ctx, patch_data, connection, item_id_to_slot, queue_events=True
+            )
         elif isinstance(event, CharacterRecruitEvent):
             new_chars = [
                 char_id

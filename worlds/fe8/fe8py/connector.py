@@ -128,13 +128,20 @@ class FE8Connection:
                 characters = tuple(payload[6 : 6 + n_dead])
                 self.events.put_nowait(GameOverEvent(characters))
 
-    async def sync_unlocked_units(self, unlocked_chars: List[int]):
+    async def sync_unlocked_units(
+        self, unlocked_chars: List[int], *, queue_events: bool = True
+    ):
         statuses = [0] * 0x22
         for char_id in unlocked_chars:
             statuses[char_id - 1] = 1
 
         req_id, fut = self._init_request()
-        await self._write_packet(1, struct.pack(">I34B", req_id, *statuses))
+        req_payload = struct.pack(">I34B", req_id, *statuses)
+
+        if queue_events:
+            await self._write_packet(1, req_payload)
+        else:
+            await self._write_packet(4, req_payload)
 
         payload: bytes = await fut
         if payload[0] == 1:

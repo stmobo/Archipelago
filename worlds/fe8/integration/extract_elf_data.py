@@ -6,11 +6,11 @@ import os.path as osp
 import struct
 import sys
 import time
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Tuple
 
 from attrs import asdict, define, field
-from fe8py.linker.relocation_types import RELOCATION_TYPES
-from progress_line import ProgressLine
+
+from ..fe8py.linker.relocation_types import RELOCATION_TYPES
 
 SYM_TYPE_UNKNOWN = 0
 SYM_TYPE_DATA = 1
@@ -19,6 +19,56 @@ SYM_TYPE_THUMB = 3
 
 SECTION_TYPE_ROM = 0
 SECTION_TYPE_WRAM = 1
+
+
+class ProgressLine:
+    spinner_frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+
+    def __init__(self):
+        self.spinner_idx = 0
+        self.last_line: str = ""
+        self.start_time = time.perf_counter()
+        self.last_update = None
+        self.prefixes: List[str] = []
+
+    def _print(self, status: str, end: str, fmt: str, args, kwargs):
+        s = " [" + status + "] "
+
+        if len(self.prefixes) > 0:
+            s += " ".join(self.prefixes)
+            s += " "
+
+        s += fmt.format(*args, **kwargs)
+
+        if len(s) < len(self.last_line):
+            s += " " * (len(self.last_line) - len(s))
+        self.last_line = s
+        print(s, file=sys.stderr, end=end, flush=True)
+
+    def warn(self, fmt: str, *args, **kwargs):
+        last_line = self.last_line
+        self._print("!", "\n", fmt, args, kwargs)
+        self.last_line = last_line
+        print(last_line, end="\r", file=sys.stderr, flush=True)
+
+    def log(self, status: str, fmt: str, *args, **kwargs):
+        last_line = self.last_line
+        self._print(status, "\n", fmt, args, kwargs)
+        self.last_line = last_line
+        print(last_line, end="\r", file=sys.stderr, flush=True)
+
+    def update(self, fmt: str, *args, **kwargs):
+        t = time.perf_counter()
+        if self.last_update is not None and (t - self.last_update) < 0.05:
+            return
+        self.last_update = t
+
+        self._print(self.spinner_frames[self.spinner_idx], "\r", fmt, args, kwargs)
+        self.spinner_idx = (self.spinner_idx + 1) % len(self.spinner_frames)
+
+    def finish(self, fmt: str, *args, **kwargs):
+        elapsed = time.perf_counter() - self.start_time
+        self._print("✓", "\n", fmt + " in {:.2f} seconds".format(elapsed), args, kwargs)
 
 
 @define
@@ -71,6 +121,7 @@ GET_SYMS = [
     "Proc_StartBlocking",
     "Proc_Goto",
     "EventEngineExists",
+    "gProc_StdEventEngine",
     "PlayerPhase_MainIdle",
     "CallEvent",
     "StartPlayerPhaseSideWindows",
@@ -123,6 +174,7 @@ GET_SHIM_RELOCS = [
     "StoreRNState",
     "RunPotentialWaitEvents",
     "sub_80B93E0",  # seems to be involved in WM input handling
+    "sub_8085374",  # seems to handle game over events
 ]
 
 OVERRIDE_SYMS = [

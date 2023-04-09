@@ -596,7 +596,7 @@ def patch_rom(base_rom: ROM, patch_data: PatcherData, connector_port: int) -> by
     # Patch certain chapter end events to ensure that missed recruits are added to the party:
     for ev_addr, chars in constants.characters.MISSABLE_RECRUIT_CATCHUPS.items():
         patcher = evt_patches.get_patcher(ev_addr)
-        catchup_event = evt_patches.new_patcher().evbit_modify(1)
+        catchup_event = evt_patches.new_patcher().evbit_modify(3)
 
         for i, char_id in enumerate(chars):
             catchup_event.set_val(i + 1, char_id)

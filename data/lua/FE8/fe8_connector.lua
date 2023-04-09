@@ -291,12 +291,12 @@ local function handleClient(client)
             local id = net.unpackBinaryString("4", payload)
             local unitPointers = {}
 
-
             -- Make sure we're in a context where enqueuing events makes sense.
             if game_data.canEnqueueEvents() then
                 for _, unitPtr in pairs(game_data.unitLookup) do
                     local charPtr = memory.read_u32_le(unitPtr)
-                    if charPtr ~= 0 then
+                    local unitIdx = memory.read_u8(unitPtr + 0x0B)
+                    if (charPtr ~= 0) and (bit.band(unitIdx, 0xC0) == 0) then
                         local charNum = memory.read_u8(charPtr + 4)
                         if unitPointers[charNum] == nil then
                             unitPointers[charNum] = {}
@@ -332,14 +332,19 @@ local function handleClient(client)
                                         enqueuePlayerPhaseEvent(evtAddr, 3, true)
                                         queuedAppearEvents[i] = evtAddr
                                     end
-                                elseif not (awaitingActiveEvent or (#activeEventAllocs > 0) or (queuedDisappearEvents[i] ~= nil) or eventsActive) then
+                                elseif not (awaitingActiveEvent or eventsActive) then
                                     -- Make sure unit is properly REMU'd.
                                     local unitStatus = memory.read_u32_le(unitPtr + 0x0C)
-                                    memory.write_u32_le(unitPtr + 0x0C, bit.bor(unitStatus, 0x04210009))
+                                    local newStatus = bit.bor(unitStatus, 0x04210009)
+                                    memory.write_u32_le(unitPtr + 0x0C, newStatus)
+
+                                    if newStatus ~= unitStatus then
+                                        writeU8Symbol("shouldRefreshBmSprites", 1)
+                                    end
                                 end
                             end
                         elseif newAvailStatus[i] ~= 0 and prevAvailStatus[i] == 0 then
-                            -- Unit was not previously available but also doesn't have a unit pointer yet.
+                            -- Unit was not previously available but also isn't loaded as a unit yet.
                             -- Enqueue a text box event for them.
                             local textIdx = readU16Symbol("UnitReceivedTextIds", (i * 2))
                             local evtAddr = setupTextboxEvent(textIdx)
@@ -378,6 +383,14 @@ local function handleClient(client)
             local id = net.unpackBinaryString("4", payload)
             local evtAddr = setupGameOverEvent()
             enqueuePlayerPhaseEvent(evtAddr, 3, false)
+            client:writePacket(1, net.packBinaryString("41", id, 1))
+        elseif packetType == 4 then
+            -- Sync availability without queuing events.
+            local id = net.unpackBinaryString("4", payload)
+            local availSymAddr = game_data.getSymbolAddress("IsCharacterAvailable")
+            local prevAvailStatus = memory.read_bytes_as_array(availSymAddr + 1, 0x22)
+            local newAvailStatus = {string.byte(payload, 5, 0x26)}
+            memory.write_bytes_as_array(availSymAddr + 1, newAvailStatus)
             client:writePacket(1, net.packBinaryString("41", id, 1))
         end
     end
